@@ -3,6 +3,11 @@
 - `nodemon`
 - `npx vite build --watch`
 
+## TODO
+
+- Actual timing for cycles
+- Support reverse cycles
+
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:

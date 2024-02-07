@@ -1,8 +1,9 @@
 import "./App.css";
-import { useRef } from "react";
-import { loadImage } from "./image.ts";
+import { useRef, useState } from "react";
+import { Image } from "./image.ts";
 
 function App() {
+  const [image, setImage] = useState<Image | null>(null);
   const canvasRef = useRef(null);
 
   return (
@@ -28,7 +29,11 @@ function App() {
                   .then((data) => {
                     // console.log("File uploaded successfully:", data);
                     if (canvasRef.current) {
-                      loadImage(data, canvasRef.current);
+                      if (image) {
+                        image.destroy();
+                      }
+
+                      setImage(new Image(data, canvasRef.current));
                     }
                   })
                   .catch((error) => {
