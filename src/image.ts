@@ -11,7 +11,7 @@ export class Image {
   currentColors: number[][];
   ctx: CanvasRenderingContext2D;
   pixelData: Uint8ClampedArray;
-  interval: number = 0;
+  running: boolean;
   cycleProgresses: number[];
 
   // ----------
@@ -27,6 +27,7 @@ export class Image {
     this.ctx = canvas.getContext("2d")!;
     this.cycles = cycles.filter((cycle) => cycle.low !== cycle.high);
     this.cycleProgresses = this.cycles.map(() => 0);
+    this.running = true;
 
     // console.log("cycles: ", this.cycles);
 
@@ -42,7 +43,13 @@ export class Image {
     }
 
     let lastTime = Date.now();
-    this.interval = setInterval(() => {
+    const frame = () => {
+      if (!this.running) {
+        return;
+      }
+
+      requestAnimationFrame(frame);
+
       const now = Date.now();
       const secondsDiff = (now - lastTime) / 1000;
       lastTime = now;
@@ -68,13 +75,15 @@ export class Image {
       }
 
       this.draw();
-    }, 10);
+    };
+
+    requestAnimationFrame(frame);
   }
 
   // ----------
   destroy() {
     // Stop the animation
-    clearInterval(this.interval);
+    this.running = false;
   }
 
   // ----------
