@@ -1,24 +1,18 @@
-type LbmCycle = {
-  low: number;
-  high: number;
-};
+import { LbmCycle, LbmData } from "./types";
 
-type LbmData = {
-  width: number;
-  height: number;
-  colors: number[][];
-  pixels: number[];
-  cycles: LbmCycle[];
-};
+const LBM_CYCLE_RATE_DIVISOR = 280;
 
+// ----------
 export class Image {
   width: number;
   height: number;
   pixels: number[];
+  cycles: LbmCycle[];
   currentColors: number[][];
   ctx: CanvasRenderingContext2D;
   pixelData: Uint8ClampedArray;
   interval: number = 0;
+  cycleProgresses: number[];
 
   // ----------
   constructor(data: LbmData, canvas: HTMLCanvasElement) {
@@ -31,26 +25,50 @@ export class Image {
     this.currentColors = colors.slice();
     this.pixelData = new Uint8ClampedArray(4 * width * height);
     this.ctx = canvas.getContext("2d")!;
+    this.cycles = cycles.filter((cycle) => cycle.low !== cycle.high);
+    this.cycleProgresses = this.cycles.map(() => 0);
+
+    // console.log("cycles: ", this.cycles);
+
+    for (const cycle of cycles) {
+      if (cycle.reverse !== 0 && cycle.reverse !== 2) {
+        console.warn("bad reverse:", cycle.reverse);
+      }
+    }
 
     if (pixels.length !== width * height) {
       console.error("bad size");
       return;
     }
 
+    let lastTime = Date.now();
     this.interval = setInterval(() => {
-      for (let i = 0; i < cycles.length; i++) {
+      const now = Date.now();
+      const secondsDiff = (now - lastTime) / 1000;
+      lastTime = now;
+
+      for (let i = 0; i < this.cycles.length; i++) {
         const cycle = cycles[i];
-        const low = cycle.low;
-        const high = cycle.high;
-        this.currentColors.splice(
-          low,
-          0,
-          this.currentColors.splice(high, 1)[0]
-        );
+        const cycleRate = cycle.rate / LBM_CYCLE_RATE_DIVISOR;
+        this.cycleProgresses[i] += secondsDiff * cycleRate;
+        if (this.cycleProgresses[i] > 1) {
+          this.cycleProgresses[i]--;
+          let low = cycle.low;
+          let high = cycle.high;
+          if (cycle.reverse === 2) {
+            [low, high] = [high, low];
+          }
+
+          this.currentColors.splice(
+            low,
+            0,
+            this.currentColors.splice(high, 1)[0]
+          );
+        }
       }
 
       this.draw();
-    }, 100);
+    }, 10);
   }
 
   // ----------

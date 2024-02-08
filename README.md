@@ -5,8 +5,8 @@
 
 ## TODO
 
-- Actual timing for cycles
-- Support reverse cycles
+- Cycle blending
+- Optimize cycling so we only touch the pixels that need to change
 
 ## Expanding the ESLint configuration
 

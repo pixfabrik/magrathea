@@ -1,10 +1,20 @@
 import "./App.css";
-import { useRef, useState } from "react";
-import { Image } from "./image.ts";
+import { LbmData } from "./types";
+import { useEffect, useRef, useState } from "react";
+import { Image } from "./image";
+import { loadImage, saveImage } from "./storage";
 
 function App() {
   const [image, setImage] = useState<Image | null>(null);
   const canvasRef = useRef(null);
+
+  useEffect(() => {
+    loadImage().then((data: LbmData) => {
+      if (canvasRef.current) {
+        setImage(new Image(data, canvasRef.current));
+      }
+    });
+  }, []);
 
   return (
     <div className="App">
@@ -34,6 +44,7 @@ function App() {
                       }
 
                       setImage(new Image(data, canvasRef.current));
+                      saveImage(data);
                     }
                   })
                   .catch((error) => {
