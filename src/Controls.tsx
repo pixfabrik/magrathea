@@ -1,15 +1,15 @@
-import "./Controls.css";
+import "./Controls.less";
 import React from "react";
 // import AppContext, { AppContextProps } from "./AppContext";
 import { Image } from "./image";
 import { saveImage } from "./storage";
+import { PaletteInfo } from "./types";
 
 type ControlsProps = {
-  image: Image | null;
-  setImage: React.Dispatch<React.SetStateAction<Image | null>>;
+  image: Image;
 };
 
-const Controls: React.FC<ControlsProps> = ({ image, setImage }) => {
+const Controls: React.FC<ControlsProps> = ({ image }) => {
   return (
     <div className="Controls">
       {/* <AppContext.Consumer>
@@ -34,16 +34,10 @@ const Controls: React.FC<ControlsProps> = ({ image, setImage }) => {
                 .then((data) => {
                   console.log("File uploaded successfully:", data);
                   if (/\.lbm$/i.test(data.filename)) {
-                    if (image) {
-                      image.destroy();
-                    }
-
-                    setImage(new Image(data));
+                    image.loadImage(data);
                     saveImage(data);
                   } else if (/\.bbm$/i.test(data.filename)) {
-                    if (image) {
-                      image.loadColors(data);
-                    }
+                    image.loadColors(data);
                   } else {
                     console.error("Unknown file type:", data.filename);
                   }
@@ -58,6 +52,30 @@ const Controls: React.FC<ControlsProps> = ({ image, setImage }) => {
         }}
       >
         Upload an LBM file
+      </div>
+      <div>
+        {image &&
+          image.paletteInfos.map((paletteInfo: PaletteInfo) => {
+            return (
+              <div key={paletteInfo.startSeconds} className="palette-info">
+                <div>Start: {paletteInfo.startSeconds}</div>
+                <div>End: {paletteInfo.endSeconds}</div>
+                <div className="colors">
+                  {paletteInfo.colors.map((color: number[], index: number) => {
+                    return (
+                      <div
+                        className="color"
+                        key={index}
+                        style={{
+                          backgroundColor: `rgb(${color[0]}, ${color[1]}, ${color[2]})`,
+                        }}
+                      ></div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
       </div>
       {/* )}
       </AppContext.Consumer> */}

@@ -12,3 +12,10 @@ export type LbmData = {
   pixels: number[];
   cycles: LbmCycle[];
 };
+
+export type PaletteInfo = {
+  colors: number[][];
+  cycles: LbmCycle[];
+  startSeconds: number;
+  endSeconds: number;
+};
