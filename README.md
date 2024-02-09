@@ -7,6 +7,7 @@
 
 - Cycle blending
 - Optimize cycling so we only touch the pixels that need to change
+- What to do during transition if there are different cycles between palettes?
 
 ## Expanding the ESLint configuration
 

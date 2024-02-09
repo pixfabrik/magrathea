@@ -1,18 +1,32 @@
 import { LbmCycle, LbmData } from "./types";
+import { mapLinear } from "./util";
+
+type PaletteInfo = {
+  colors: number[][];
+  cycles: LbmCycle[];
+  startSeconds: number;
+  endSeconds: number;
+};
 
 const LBM_CYCLE_RATE_DIVISOR = 280;
+
+// ----------
+function getSeconds() {
+  return Date.now() / 1000;
+}
 
 // ----------
 export class Image {
   width: number;
   height: number;
   pixels: number[];
-  cycles: LbmCycle[];
+  // cycles: LbmCycle[];
   currentColors: number[][];
   ctx: CanvasRenderingContext2D;
   pixelData: Uint8ClampedArray;
   running: boolean;
-  cycleProgresses: number[];
+  // cycleProgresses: number[];
+  paletteInfos: PaletteInfo[] = [];
 
   // ----------
   constructor(data: LbmData, canvas: HTMLCanvasElement) {
@@ -25,9 +39,18 @@ export class Image {
     this.currentColors = colors.slice();
     this.pixelData = new Uint8ClampedArray(4 * width * height);
     this.ctx = canvas.getContext("2d")!;
-    this.cycles = cycles.filter((cycle) => cycle.low !== cycle.high);
-    this.cycleProgresses = this.cycles.map(() => 0);
+    // this.cycles = cycles.filter((cycle) => cycle.low !== cycle.high);
+    // this.cycleProgresses = this.cycles.map(() => 0);
     this.running = true;
+
+    const startPaletteInfo = {
+      colors: data.colors,
+      cycles: data.cycles.filter((cycle) => cycle.low !== cycle.high),
+      startSeconds: 0,
+      endSeconds: Infinity,
+    };
+
+    this.paletteInfos[0] = startPaletteInfo;
 
     // console.log("cycles: ", this.cycles);
 
@@ -42,7 +65,7 @@ export class Image {
       return;
     }
 
-    let lastTime = Date.now();
+    // let lastSeconds = getSeconds();
     const frame = () => {
       if (!this.running) {
         return;
@@ -50,28 +73,71 @@ export class Image {
 
       requestAnimationFrame(frame);
 
-      const now = Date.now();
-      const secondsDiff = (now - lastTime) / 1000;
-      lastTime = now;
+      const nowSeconds = getSeconds();
+      // const secondsDiff = (nowSeconds - lastSeconds) / 1000;
+      // lastSeconds = nowSeconds;
 
-      for (let i = 0; i < this.cycles.length; i++) {
-        const cycle = cycles[i];
-        const cycleRate = cycle.rate / LBM_CYCLE_RATE_DIVISOR;
-        this.cycleProgresses[i] += secondsDiff * cycleRate;
-        if (this.cycleProgresses[i] > 1) {
-          this.cycleProgresses[i]--;
+      // Find current palette infos
+      let startPaletteInfo: PaletteInfo | null = null,
+        endPaletteInfo: PaletteInfo | null = null;
+      for (const paletteInfo of this.paletteInfos) {
+        if (nowSeconds >= paletteInfo.startSeconds) {
+          startPaletteInfo = paletteInfo;
+
+          if (nowSeconds < paletteInfo.endSeconds) {
+            endPaletteInfo = null;
+            break;
+          }
+        } else {
+          endPaletteInfo = paletteInfo;
+        }
+      }
+
+      if (startPaletteInfo) {
+        let colors: number[][];
+        let cycles: LbmCycle[];
+        if (endPaletteInfo) {
+          const progress = mapLinear(
+            nowSeconds,
+            startPaletteInfo.endSeconds,
+            endPaletteInfo.startSeconds,
+            0,
+            1,
+            true
+          );
+
+          colors = startPaletteInfo.colors.map((startColor, i) => {
+            const endColor = endPaletteInfo!.colors[i];
+            return [
+              startColor[0] + (endColor[0] - startColor[0]) * progress,
+              startColor[1] + (endColor[1] - startColor[1]) * progress,
+              startColor[2] + (endColor[2] - startColor[2]) * progress,
+            ];
+          });
+
+          cycles = startPaletteInfo.cycles;
+        } else {
+          colors = startPaletteInfo.colors.slice();
+          cycles = startPaletteInfo.cycles;
+        }
+
+        for (let i = 0; i < cycles.length; i++) {
+          const cycle = cycles[i];
           let low = cycle.low;
           let high = cycle.high;
+          const cycleSize = high - low + 1;
+          const cycleRate = cycle.rate / LBM_CYCLE_RATE_DIVISOR;
+          const cycleAmount = (cycleRate * nowSeconds) % cycleSize;
           if (cycle.reverse === 2) {
             [low, high] = [high, low];
           }
 
-          this.currentColors.splice(
-            low,
-            0,
-            this.currentColors.splice(high, 1)[0]
-          );
+          for (let j = 0; j < cycleAmount; j++) {
+            colors.splice(low, 0, colors.splice(high, 1)[0]);
+          }
         }
+
+        this.currentColors = colors;
       }
 
       this.draw();
@@ -84,6 +150,24 @@ export class Image {
   destroy() {
     // Stop the animation
     this.running = false;
+  }
+
+  // ----------
+  loadColors(data: LbmData) {
+    const startPaletteInfo = this.paletteInfos[0];
+    startPaletteInfo.endSeconds = getSeconds();
+
+    const endPaletteInfo = {
+      colors: data.colors,
+      cycles: data.cycles.filter((cycle) => cycle.low !== cycle.high),
+      startSeconds: startPaletteInfo.endSeconds + 5,
+      endSeconds: Infinity,
+    };
+
+    this.paletteInfos[1] = endPaletteInfo;
+    // this.currentColors = data.colors.slice();
+    // this.cycles = data.cycles.filter((cycle) => cycle.low !== cycle.high);
+    // this.cycleProgresses = this.cycles.map(() => 0);
   }
 
   // ----------

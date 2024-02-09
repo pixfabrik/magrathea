@@ -37,14 +37,22 @@ function App() {
                 })
                   .then((response) => response.json())
                   .then((data) => {
-                    // console.log("File uploaded successfully:", data);
+                    console.log("File uploaded successfully:", data);
                     if (canvasRef.current) {
-                      if (image) {
-                        image.destroy();
-                      }
+                      if (/\.lbm$/i.test(data.filename)) {
+                        if (image) {
+                          image.destroy();
+                        }
 
-                      setImage(new Image(data, canvasRef.current));
-                      saveImage(data);
+                        setImage(new Image(data, canvasRef.current));
+                        saveImage(data);
+                      } else if (/\.bbm$/i.test(data.filename)) {
+                        if (image) {
+                          image.loadColors(data);
+                        }
+                      } else {
+                        console.error("Unknown file type:", data.filename);
+                      }
                     }
                   })
                   .catch((error) => {
