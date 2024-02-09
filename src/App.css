@@ -1,19 +1,8 @@
 .App {
   display: flex;
-  flex-direction: column;
-  margin: 20px;
 
   canvas {
     flex-grow: 1;
-    /* Make the pixels render sharply */
     image-rendering: pixelated;
   }
-}
-
-.upload-button {
-  display: inline-block;
-  padding: 10px;
-  border: 1px solid black;
-  border-radius: 8px;
-  cursor: pointer;
 }

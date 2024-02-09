@@ -22,23 +22,20 @@ export class Image {
   pixels: number[];
   // cycles: LbmCycle[];
   currentColors: number[][];
-  ctx: CanvasRenderingContext2D;
+  ctx: CanvasRenderingContext2D | null = null;
   pixelData: Uint8ClampedArray;
   running: boolean;
   // cycleProgresses: number[];
   paletteInfos: PaletteInfo[] = [];
 
   // ----------
-  constructor(data: LbmData, canvas: HTMLCanvasElement) {
+  constructor(data: LbmData) {
     const { width, height, colors, pixels, cycles } = data;
-    canvas.width = width;
-    canvas.height = height;
     this.width = width;
     this.height = height;
     this.pixels = pixels;
     this.currentColors = colors.slice();
     this.pixelData = new Uint8ClampedArray(4 * width * height);
-    this.ctx = canvas.getContext("2d")!;
     // this.cycles = cycles.filter((cycle) => cycle.low !== cycle.high);
     // this.cycleProgresses = this.cycles.map(() => 0);
     this.running = true;
@@ -153,6 +150,13 @@ export class Image {
   }
 
   // ----------
+  setCanvas(canvas: HTMLCanvasElement) {
+    canvas.width = this.width;
+    canvas.height = this.height;
+    this.ctx = canvas.getContext("2d")!;
+  }
+
+  // ----------
   loadColors(data: LbmData) {
     const startPaletteInfo = this.paletteInfos[0];
     startPaletteInfo.endSeconds = getSeconds();
@@ -173,6 +177,9 @@ export class Image {
   // ----------
   draw() {
     const { width, height, currentColors, pixels, ctx, pixelData } = this;
+    if (!ctx) {
+      return;
+    }
 
     for (let i = 0; i < pixels.length; i++) {
       const pixel = pixels[i];

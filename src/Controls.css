@@ -1,0 +1,12 @@
+.Controls {
+  width: 300px;
+  border-left: 1px solid #aaa;
+}
+
+.upload-button {
+  display: inline-block;
+  padding: 10px;
+  border: 1px solid black;
+  border-radius: 8px;
+  cursor: pointer;
+}
