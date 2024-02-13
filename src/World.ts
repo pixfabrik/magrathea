@@ -1,38 +1,24 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { LbmCycle, LbmData, PaletteInfo } from "./types";
 import { mapLinear } from "./util";
+import { maxSeconds } from "./vars";
 
 const LBM_CYCLE_RATE_DIVISOR = 280;
 const worldStorageKey = "world";
-const maxSeconds = 24 * 60 * 60;
-
-const now = new Date();
-const midnightSeconds =
-  new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000;
 
 // ----------
-function getSeconds() {
-  return Date.now() / 1000 - midnightSeconds;
-  // const date = new Date();
-  // return date.getSeconds() + date.getMinutes() * 60 + date.getHours() * 60 * 60;
-}
-
-// ----------
-export class World {
+export default class World {
   width: number = 0;
   height: number = 0;
   pixels: number[] = [];
   currentColors: number[][] = [];
   ctx: CanvasRenderingContext2D | null = null;
   pixelData: Uint8ClampedArray = new Uint8ClampedArray(0);
-  running: boolean = true;
   paletteInfos: PaletteInfo[] = [];
   onChange: (() => void) | null = null;
 
   // ----------
   constructor() {
-    this.startAnimation();
-
     const data = localStorage.getItem(worldStorageKey);
     if (data) {
       try {
@@ -59,93 +45,75 @@ export class World {
   }
 
   // ----------
-  startAnimation() {
-    // let lastSeconds = getSeconds();
-    const frame = () => {
-      if (!this.running) {
-        return;
+  frame(nowSeconds: number) {
+    // Find current palette infos
+    let startPaletteInfo: PaletteInfo | null = null,
+      endPaletteInfo: PaletteInfo | null = null;
+    for (const paletteInfo of this.paletteInfos) {
+      if (nowSeconds >= paletteInfo.startSeconds) {
+        startPaletteInfo = paletteInfo;
+
+        if (nowSeconds < paletteInfo.endSeconds) {
+          endPaletteInfo = null;
+          break;
+        }
+      } else {
+        endPaletteInfo = paletteInfo;
+      }
+    }
+
+    if (startPaletteInfo) {
+      let colors: number[][];
+      let cycles: LbmCycle[];
+      if (endPaletteInfo) {
+        const progress = mapLinear(
+          nowSeconds,
+          startPaletteInfo.endSeconds,
+          endPaletteInfo.startSeconds,
+          0,
+          1,
+          true
+        );
+
+        colors = startPaletteInfo.colors.map((startColor, i) => {
+          const endColor = endPaletteInfo!.colors[i];
+          return [
+            startColor[0] + (endColor[0] - startColor[0]) * progress,
+            startColor[1] + (endColor[1] - startColor[1]) * progress,
+            startColor[2] + (endColor[2] - startColor[2]) * progress,
+          ];
+        });
+
+        cycles = startPaletteInfo.cycles;
+      } else {
+        colors = startPaletteInfo.colors.slice();
+        cycles = startPaletteInfo.cycles;
       }
 
-      requestAnimationFrame(frame);
+      for (let i = 0; i < cycles.length; i++) {
+        const cycle = cycles[i];
+        let low = cycle.low;
+        let high = cycle.high;
+        const cycleSize = high - low + 1;
+        const cycleRate = cycle.rate / LBM_CYCLE_RATE_DIVISOR;
+        const cycleAmount = (cycleRate * nowSeconds) % cycleSize;
+        if (cycle.reverse === 2) {
+          [low, high] = [high, low];
+        }
 
-      const nowSeconds = getSeconds();
-      // const secondsDiff = (nowSeconds - lastSeconds) / 1000;
-      // lastSeconds = nowSeconds;
-
-      // Find current palette infos
-      let startPaletteInfo: PaletteInfo | null = null,
-        endPaletteInfo: PaletteInfo | null = null;
-      for (const paletteInfo of this.paletteInfos) {
-        if (nowSeconds >= paletteInfo.startSeconds) {
-          startPaletteInfo = paletteInfo;
-
-          if (nowSeconds < paletteInfo.endSeconds) {
-            endPaletteInfo = null;
-            break;
-          }
-        } else {
-          endPaletteInfo = paletteInfo;
+        for (let j = 0; j < cycleAmount; j++) {
+          colors.splice(low, 0, colors.splice(high, 1)[0]);
         }
       }
 
-      if (startPaletteInfo) {
-        let colors: number[][];
-        let cycles: LbmCycle[];
-        if (endPaletteInfo) {
-          const progress = mapLinear(
-            nowSeconds,
-            startPaletteInfo.endSeconds,
-            endPaletteInfo.startSeconds,
-            0,
-            1,
-            true
-          );
+      this.currentColors = colors;
+    }
 
-          colors = startPaletteInfo.colors.map((startColor, i) => {
-            const endColor = endPaletteInfo!.colors[i];
-            return [
-              startColor[0] + (endColor[0] - startColor[0]) * progress,
-              startColor[1] + (endColor[1] - startColor[1]) * progress,
-              startColor[2] + (endColor[2] - startColor[2]) * progress,
-            ];
-          });
-
-          cycles = startPaletteInfo.cycles;
-        } else {
-          colors = startPaletteInfo.colors.slice();
-          cycles = startPaletteInfo.cycles;
-        }
-
-        for (let i = 0; i < cycles.length; i++) {
-          const cycle = cycles[i];
-          let low = cycle.low;
-          let high = cycle.high;
-          const cycleSize = high - low + 1;
-          const cycleRate = cycle.rate / LBM_CYCLE_RATE_DIVISOR;
-          const cycleAmount = (cycleRate * nowSeconds) % cycleSize;
-          if (cycle.reverse === 2) {
-            [low, high] = [high, low];
-          }
-
-          for (let j = 0; j < cycleAmount; j++) {
-            colors.splice(low, 0, colors.splice(high, 1)[0]);
-          }
-        }
-
-        this.currentColors = colors;
-      }
-
-      this.draw();
-    };
-
-    requestAnimationFrame(frame);
+    this.draw();
   }
 
   // ----------
-  destroy() {
-    // Stop the animation
-    this.running = false;
-  }
+  destroy() {}
 
   // ----------
   setCanvas(canvas: HTMLCanvasElement) {
@@ -185,7 +153,7 @@ export class World {
     let seconds = 0;
     if (this.paletteInfos.length) {
       const startPaletteInfo = this.paletteInfos[this.paletteInfos.length - 1];
-      startPaletteInfo.endSeconds = getSeconds();
+      startPaletteInfo.endSeconds = startPaletteInfo.startSeconds + 60;
       seconds = startPaletteInfo.endSeconds + 5;
     }
 

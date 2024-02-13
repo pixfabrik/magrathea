@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import "./App.css";
 import { useEffect, useRef, useState } from "react";
-import { World } from "./World";
+import WorldRunner from "./WorldRunner";
 import Controls from "./Controls";
 
-const world = new World();
+const worldRunner = new WorldRunner();
 
 function App() {
   const [changeCount, setChangeCount] = useState<number>(0);
@@ -12,12 +12,12 @@ function App() {
 
   useEffect(() => {
     if (canvasRef.current) {
-      world.setCanvas(canvasRef.current);
+      worldRunner.world.setCanvas(canvasRef.current);
     }
   }, []);
 
   useEffect(() => {
-    world.onChange = () => {
+    worldRunner.world.onChange = () => {
       setChangeCount(changeCount + 1);
     };
   }, [changeCount]);
@@ -26,7 +26,7 @@ function App() {
     <div className="App">
       {/* <AppContext.Provider value={{ world, setWorld }}> */}
       <canvas ref={canvasRef} />
-      <Controls world={world}></Controls>
+      <Controls worldRunner={worldRunner}></Controls>
       {/* </AppContext.Provider> */}
     </div>
   );

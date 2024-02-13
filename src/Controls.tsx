@@ -1,16 +1,25 @@
 import "./Controls.less";
-import React from "react";
-// import AppContext, { AppContextProps } from "./AppContext";
-import { World } from "./World";
-// import { saveImage } from "./storage";
+import React, { useEffect, useState } from "react";
+import WorldRunner from "./WorldRunner";
 import { PaletteInfo } from "./types";
 import { makeTimeString } from "./util";
+import { maxSeconds } from "./vars";
 
 type ControlsProps = {
-  world: World;
+  worldRunner: WorldRunner;
 };
 
-const Controls: React.FC<ControlsProps> = ({ world }) => {
+const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
+  const [changeCount, setChangeCount] = useState<number>(0);
+
+  useEffect(() => {
+    worldRunner.onChange = () => {
+      setChangeCount(changeCount + 1);
+    };
+  }, [changeCount]);
+
+  const seconds = worldRunner.getSeconds();
+
   return (
     <div className="Controls">
       {/* <AppContext.Consumer>
@@ -35,10 +44,10 @@ const Controls: React.FC<ControlsProps> = ({ world }) => {
                 .then((data) => {
                   console.log("File uploaded successfully:", data);
                   if (/\.lbm$/i.test(data.filename)) {
-                    world.loadImage(data);
+                    worldRunner.world.loadImage(data);
                     // saveImage(data);
                   } else if (/\.bbm$/i.test(data.filename)) {
-                    world.loadColors(data);
+                    worldRunner.world.loadColors(data);
                   } else {
                     console.error("Unknown file type:", data.filename);
                   }
@@ -54,9 +63,20 @@ const Controls: React.FC<ControlsProps> = ({ world }) => {
       >
         Upload an LBM file
       </div>
+      <div>{makeTimeString(seconds)}</div>
+      <input
+        className="time-slider"
+        type="range"
+        min="0"
+        max={maxSeconds - 1}
+        value={seconds}
+        onChange={(event) => {
+          worldRunner.setSeconds(parseFloat(event.currentTarget.value));
+        }}
+      />
       <div>
-        {world &&
-          world.paletteInfos.map((paletteInfo: PaletteInfo) => {
+        {worldRunner.world &&
+          worldRunner.world.paletteInfos.map((paletteInfo: PaletteInfo) => {
             return (
               <div key={paletteInfo.startSeconds} className="palette-info">
                 <div>Start: {makeTimeString(paletteInfo.startSeconds)}</div>
