@@ -180,6 +180,16 @@ export default class World {
   }
 
   // ----------
+  deletePalette(paletteIndex: number) {
+    this.paletteInfos.splice(paletteIndex, 1);
+    this.save();
+
+    if (this.onChange) {
+      this.onChange();
+    }
+  }
+
+  // ----------
   draw() {
     const { width, height, currentColors, pixels, ctx, pixelData } = this;
     if (!ctx || !width || !height || !currentColors.length) {

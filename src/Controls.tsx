@@ -74,29 +74,47 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
           worldRunner.setSeconds(parseFloat(event.currentTarget.value));
         }}
       />
-      <div>
+      <div className="palette-area">
         {worldRunner.world &&
-          worldRunner.world.paletteInfos.map((paletteInfo: PaletteInfo) => {
-            return (
-              <div key={paletteInfo.startSeconds} className="palette-info">
-                <div>Start: {makeTimeString(paletteInfo.startSeconds)}</div>
-                <div>End: {makeTimeString(paletteInfo.endSeconds)}</div>
-                <div className="colors">
-                  {paletteInfo.colors.map((color: number[], index: number) => {
-                    return (
-                      <div
-                        className="color"
-                        key={index}
-                        style={{
-                          backgroundColor: `rgb(${color[0]}, ${color[1]}, ${color[2]})`,
-                        }}
-                      ></div>
-                    );
-                  })}
+          worldRunner.world.paletteInfos.map(
+            (paletteInfo: PaletteInfo, paletteIndex: number) => {
+              return (
+                <div key={paletteInfo.startSeconds} className="palette-info">
+                  <div>Start: {makeTimeString(paletteInfo.startSeconds)}</div>
+                  <div>End: {makeTimeString(paletteInfo.endSeconds)}</div>
+                  <div className="colors">
+                    {paletteInfo.colors.map(
+                      (color: number[], index: number) => {
+                        return (
+                          <div
+                            className="color"
+                            key={index}
+                            style={{
+                              backgroundColor: `rgb(${color[0]}, ${color[1]}, ${color[2]})`,
+                            }}
+                          ></div>
+                        );
+                      }
+                    )}
+                  </div>
+                  <button
+                    onClick={() => {
+                      worldRunner.setSeconds(paletteInfo.startSeconds);
+                    }}
+                  >
+                    Go To
+                  </button>
+                  <button
+                    onClick={() => {
+                      worldRunner.world.deletePalette(paletteIndex);
+                    }}
+                  >
+                    Delete
+                  </button>
                 </div>
-              </div>
-            );
-          })}
+              );
+            }
+          )}
       </div>
       {/* )}
       </AppContext.Consumer> */}
