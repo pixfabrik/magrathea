@@ -38,6 +38,8 @@ export default class World {
 
         this.pixels = parsedData.pixels;
         this.updateForImage();
+
+        // console.log(this.paletteInfos);
       } catch (err) {
         console.error("Error parsing world data:", err);
       }

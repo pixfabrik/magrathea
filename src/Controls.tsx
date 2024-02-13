@@ -81,7 +81,14 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                       worldRunner.setSeconds(paletteInfo.startSeconds);
                     }}
                   >
-                    Go To
+                    Go To Start
+                  </button>
+                  <button
+                    onClick={() => {
+                      worldRunner.setSeconds(paletteInfo.endSeconds);
+                    }}
+                  >
+                    Go To End
                   </button>
                   <button
                     onClick={() => {

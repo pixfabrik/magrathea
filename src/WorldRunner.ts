@@ -26,7 +26,9 @@ export default class WorldRunner {
 
   // ----------
   getSeconds() {
-    return this.getRealSeconds() + this.offsetSeconds;
+    const seconds = this.getRealSeconds() + this.offsetSeconds;
+    // console.log(seconds);
+    return seconds;
   }
 
   // ----------
