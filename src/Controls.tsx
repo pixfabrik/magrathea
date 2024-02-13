@@ -1,16 +1,16 @@
 import "./Controls.less";
 import React from "react";
 // import AppContext, { AppContextProps } from "./AppContext";
-import { Image } from "./image";
+import { World } from "./World";
 // import { saveImage } from "./storage";
 import { PaletteInfo } from "./types";
 import { makeTimeString } from "./util";
 
 type ControlsProps = {
-  image: Image;
+  world: World;
 };
 
-const Controls: React.FC<ControlsProps> = ({ image }) => {
+const Controls: React.FC<ControlsProps> = ({ world }) => {
   return (
     <div className="Controls">
       {/* <AppContext.Consumer>
@@ -35,10 +35,10 @@ const Controls: React.FC<ControlsProps> = ({ image }) => {
                 .then((data) => {
                   console.log("File uploaded successfully:", data);
                   if (/\.lbm$/i.test(data.filename)) {
-                    image.loadImage(data);
+                    world.loadImage(data);
                     // saveImage(data);
                   } else if (/\.bbm$/i.test(data.filename)) {
-                    image.loadColors(data);
+                    world.loadColors(data);
                   } else {
                     console.error("Unknown file type:", data.filename);
                   }
@@ -55,8 +55,8 @@ const Controls: React.FC<ControlsProps> = ({ image }) => {
         Upload an LBM file
       </div>
       <div>
-        {image &&
-          image.paletteInfos.map((paletteInfo: PaletteInfo) => {
+        {world &&
+          world.paletteInfos.map((paletteInfo: PaletteInfo) => {
             return (
               <div key={paletteInfo.startSeconds} className="palette-info">
                 <div>Start: {makeTimeString(paletteInfo.startSeconds)}</div>

@@ -1,12 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import "./App.css";
-// import { LbmData, PaletteInfo } from "./types";
 import { useEffect, useRef, useState } from "react";
-import { Image } from "./image";
-// import { loadImage } from "./storage";
+import { World } from "./World";
 import Controls from "./Controls";
 
-const image = new Image();
+const world = new World();
 
 function App() {
   const [changeCount, setChangeCount] = useState<number>(0);
@@ -14,21 +12,21 @@ function App() {
 
   useEffect(() => {
     if (canvasRef.current) {
-      image.setCanvas(canvasRef.current);
+      world.setCanvas(canvasRef.current);
     }
   }, []);
 
   useEffect(() => {
-    image.onChange = () => {
+    world.onChange = () => {
       setChangeCount(changeCount + 1);
     };
   }, [changeCount]);
 
   return (
     <div className="App">
-      {/* <AppContext.Provider value={{ image, setImage }}> */}
+      {/* <AppContext.Provider value={{ world, setWorld }}> */}
       <canvas ref={canvasRef} />
-      <Controls image={image}></Controls>
+      <Controls world={world}></Controls>
       {/* </AppContext.Provider> */}
     </div>
   );

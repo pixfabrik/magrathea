@@ -18,7 +18,7 @@ function getSeconds() {
 }
 
 // ----------
-export class Image {
+export class World {
   width: number = 0;
   height: number = 0;
   pixels: number[] = [];
