@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
+import { LbmData } from "./types";
+
 // ----------
 export function mapLinear(
   x: number,
@@ -58,4 +62,36 @@ export function makeTimeString(seconds: number) {
   }
 
   return hours + ":" + minutes + mark;
+}
+
+// ----------
+export function importLbm(types: string[]): Promise<LbmData> {
+  return new Promise((resolve, reject) => {
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = types.map((type) => `.${type}`).join(",");
+
+    fileInput.onchange = () => {
+      const file = fileInput.files && fileInput.files[0];
+      if (file) {
+        const formData = new FormData();
+        formData.append("fileInput", file);
+
+        fetch("/upload", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            // console.log("File uploaded successfully:", data);
+            resolve(data);
+          })
+          .catch((error) => {
+            console.error("Error uploading file:", error);
+          });
+      }
+    };
+
+    fileInput.click();
+  });
 }

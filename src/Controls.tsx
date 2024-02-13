@@ -2,7 +2,7 @@ import "./Controls.less";
 import React, { useEffect, useState } from "react";
 import WorldRunner from "./WorldRunner";
 import { PaletteInfo } from "./types";
-import { makeTimeString } from "./util";
+import { importLbm, makeTimeString } from "./util";
 import { maxSeconds } from "./vars";
 
 type ControlsProps = {
@@ -26,42 +26,21 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
         {(props: AppContextProps) => ( */}
       <div
         className="upload-button"
-        onClick={() => {
-          const fileInput = document.createElement("input");
-          fileInput.type = "file";
-
-          fileInput.onchange = () => {
-            const file = fileInput.files && fileInput.files[0];
-            if (file) {
-              const formData = new FormData();
-              formData.append("fileInput", file);
-
-              fetch("/upload", {
-                method: "POST",
-                body: formData,
-              })
-                .then((response) => response.json())
-                .then((data) => {
-                  console.log("File uploaded successfully:", data);
-                  if (/\.lbm$/i.test(data.filename)) {
-                    worldRunner.world.loadImage(data);
-                    // saveImage(data);
-                  } else if (/\.bbm$/i.test(data.filename)) {
-                    worldRunner.world.loadColors(data);
-                  } else {
-                    console.error("Unknown file type:", data.filename);
-                  }
-                })
-                .catch((error) => {
-                  console.error("Error uploading file:", error);
-                });
-            }
-          };
-
-          fileInput.click();
+        onClick={async () => {
+          const data = await importLbm(["lbm"]);
+          worldRunner.world.loadImage(data);
         }}
       >
-        Upload an LBM file
+        Load Pixels
+      </div>
+      <div
+        className="upload-button"
+        onClick={async () => {
+          const data = await importLbm(["bbm", "lbm"]);
+          worldRunner.world.loadColors(data);
+        }}
+      >
+        Load Palette
       </div>
       <div>{makeTimeString(seconds)}</div>
       <input

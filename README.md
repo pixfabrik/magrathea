@@ -8,6 +8,8 @@
 - Cycle blending
 - Optimize cycling so we only touch the pixels that need to change
 - What to do during transition if there are different cycles between palettes?
+- Support reverse 4
+- Stop stretching the canvas if the sidebar gets long
 
 ## Expanding the ESLint configuration
 
