@@ -2,7 +2,7 @@ import "./Controls.less";
 import React from "react";
 // import AppContext, { AppContextProps } from "./AppContext";
 import { Image } from "./image";
-import { saveImage } from "./storage";
+// import { saveImage } from "./storage";
 import { PaletteInfo } from "./types";
 
 type ControlsProps = {
@@ -35,7 +35,7 @@ const Controls: React.FC<ControlsProps> = ({ image }) => {
                   console.log("File uploaded successfully:", data);
                   if (/\.lbm$/i.test(data.filename)) {
                     image.loadImage(data);
-                    saveImage(data);
+                    // saveImage(data);
                   } else if (/\.bbm$/i.test(data.filename)) {
                     image.loadColors(data);
                   } else {

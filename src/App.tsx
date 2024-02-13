@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import "./App.css";
-import { LbmData, PaletteInfo } from "./types";
+// import { LbmData, PaletteInfo } from "./types";
 import { useEffect, useRef, useState } from "react";
 import { Image } from "./image";
-import { loadImage } from "./storage";
+// import { loadImage } from "./storage";
 import Controls from "./Controls";
 
 const image = new Image();
@@ -16,10 +16,6 @@ function App() {
     if (canvasRef.current) {
       image.setCanvas(canvasRef.current);
     }
-
-    loadImage().then((data: LbmData) => {
-      image.loadImage(data);
-    });
   }, []);
 
   useEffect(() => {

@@ -23,6 +23,32 @@ export class Image {
 
   // ----------
   constructor() {
+    this.startAnimation();
+
+    const data = localStorage.getItem(worldStorageKey);
+    if (data) {
+      try {
+        const parsedData = JSON.parse(data);
+        this.width = parsedData.width;
+        this.height = parsedData.height;
+        this.paletteInfos = parsedData.paletteInfos;
+
+        for (const paletteInfo of this.paletteInfos) {
+          if (paletteInfo.endSeconds === null) {
+            paletteInfo.endSeconds = Infinity;
+          }
+        }
+
+        this.pixels = parsedData.pixels;
+        this.updateForImage();
+      } catch (err) {
+        console.error("Error parsing world data:", err);
+      }
+    }
+  }
+
+  // ----------
+  startAnimation() {
     // let lastSeconds = getSeconds();
     const frame = () => {
       if (!this.running) {
@@ -115,6 +141,7 @@ export class Image {
     canvas.width = this.width;
     canvas.height = this.height;
     this.ctx = canvas.getContext("2d")!;
+    this.updateForImage();
   }
 
   // ----------
@@ -127,14 +154,19 @@ export class Image {
     this.width = data.width;
     this.height = data.height;
     this.pixels = data.pixels;
+
+    this.updateForImage();
+    this.loadColors(data);
+  }
+
+  // ----------
+  updateForImage() {
     this.pixelData = new Uint8ClampedArray(4 * this.width * this.height);
 
     if (this.ctx) {
       this.ctx.canvas.width = this.width;
       this.ctx.canvas.height = this.height;
     }
-
-    this.loadColors(data);
   }
 
   // ----------
