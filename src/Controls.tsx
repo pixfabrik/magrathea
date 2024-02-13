@@ -4,6 +4,7 @@ import React from "react";
 import { Image } from "./image";
 // import { saveImage } from "./storage";
 import { PaletteInfo } from "./types";
+import { makeTimeString } from "./util";
 
 type ControlsProps = {
   image: Image;
@@ -58,8 +59,8 @@ const Controls: React.FC<ControlsProps> = ({ image }) => {
           image.paletteInfos.map((paletteInfo: PaletteInfo) => {
             return (
               <div key={paletteInfo.startSeconds} className="palette-info">
-                <div>Start: {paletteInfo.startSeconds}</div>
-                <div>End: {paletteInfo.endSeconds}</div>
+                <div>Start: {makeTimeString(paletteInfo.startSeconds)}</div>
+                <div>End: {makeTimeString(paletteInfo.endSeconds)}</div>
                 <div className="colors">
                   {paletteInfo.colors.map((color: number[], index: number) => {
                     return (

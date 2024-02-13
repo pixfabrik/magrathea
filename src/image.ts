@@ -1,12 +1,20 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { LbmCycle, LbmData, PaletteInfo } from "./types";
 import { mapLinear } from "./util";
 
 const LBM_CYCLE_RATE_DIVISOR = 280;
 const worldStorageKey = "world";
+const maxSeconds = 24 * 60 * 60;
+
+const now = new Date();
+const midnightSeconds =
+  new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000;
 
 // ----------
 function getSeconds() {
-  return Date.now() / 1000;
+  return Date.now() / 1000 - midnightSeconds;
+  // const date = new Date();
+  // return date.getSeconds() + date.getMinutes() * 60 + date.getHours() * 60 * 60;
 }
 
 // ----------
@@ -35,8 +43,11 @@ export class Image {
 
         for (const paletteInfo of this.paletteInfos) {
           if (paletteInfo.endSeconds === null) {
-            paletteInfo.endSeconds = Infinity;
+            paletteInfo.endSeconds = maxSeconds - 1;
           }
+
+          paletteInfo.startSeconds %= maxSeconds;
+          paletteInfo.endSeconds %= maxSeconds;
         }
 
         this.pixels = parsedData.pixels;
@@ -182,7 +193,7 @@ export class Image {
       colors: data.colors,
       cycles: data.cycles.filter((cycle) => cycle.low !== cycle.high),
       startSeconds: seconds,
-      endSeconds: Infinity,
+      endSeconds: maxSeconds - 1,
     };
 
     for (const cycle of endPaletteInfo.cycles) {

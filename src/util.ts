@@ -37,3 +37,25 @@ export function getRadians(x: number, y: number) {
 export function getDistance(x: number, y: number) {
   return Math.sqrt(x * x + y * y);
 }
+
+// ----------
+export function makeTimeString(seconds: number) {
+  let mark = "am";
+  let hours = seconds / (60 * 60);
+  let minutes = "" + Math.floor((hours - Math.floor(hours)) * 60);
+  if (minutes.length === 1) {
+    minutes = "0" + minutes;
+  }
+
+  hours = Math.floor(hours);
+  if (hours === 0) {
+    hours = 12;
+  } else if (hours === 12) {
+    mark = "pm";
+  } else if (hours >= 13) {
+    hours -= 12;
+    mark = "pm";
+  }
+
+  return hours + ":" + minutes + mark;
+}
