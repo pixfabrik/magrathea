@@ -51,6 +51,7 @@ export default class World {
     // Find current palette infos
     let startPaletteInfo: PaletteInfo | null = null,
       endPaletteInfo: PaletteInfo | null = null;
+
     for (const paletteInfo of this.paletteInfos) {
       if (nowSeconds >= paletteInfo.startSeconds) {
         startPaletteInfo = paletteInfo;
@@ -59,8 +60,9 @@ export default class World {
           endPaletteInfo = null;
           break;
         }
-      } else {
+      } else if (startPaletteInfo) {
         endPaletteInfo = paletteInfo;
+        break;
       }
     }
 

@@ -46,9 +46,17 @@ export function getDistance(x: number, y: number) {
 export function makeTimeString(seconds: number) {
   let mark = "am";
   let hours = seconds / (60 * 60);
-  let minutes = "" + Math.floor((hours - Math.floor(hours)) * 60);
-  if (minutes.length === 1) {
-    minutes = "0" + minutes;
+  const minutes = (hours - Math.floor(hours)) * 60;
+  const remainingSeconds = seconds % 60;
+
+  let minutesString = "" + Math.floor(minutes);
+  if (minutesString.length === 1) {
+    minutesString = "0" + minutesString;
+  }
+
+  let secondsString = "" + Math.floor(remainingSeconds);
+  if (secondsString.length === 1) {
+    secondsString = "0" + secondsString;
   }
 
   hours = Math.floor(hours);
@@ -61,7 +69,9 @@ export function makeTimeString(seconds: number) {
     mark = "pm";
   }
 
-  return hours + ":" + minutes + mark;
+  const result = hours + ":" + minutesString + ":" + secondsString + mark;
+  // console.log("time:", seconds, result, hours, minutes, remainingSeconds);
+  return result;
 }
 
 // ----------
