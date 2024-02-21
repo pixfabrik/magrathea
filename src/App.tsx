@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import "./App.css";
+import "./App.less";
 import { useEffect, useRef, useState } from "react";
 import WorldRunner from "./WorldRunner";
 import Controls from "./Controls";
@@ -25,8 +25,13 @@ function App() {
   return (
     <div className="App">
       {/* <AppContext.Provider value={{ world, setWorld }}> */}
-      <canvas ref={canvasRef} />
-      <Controls worldRunner={worldRunner}></Controls>
+      <div className="top-nav">Living Worlds Maker</div>
+      <div className="main-area">
+        <div className="canvas-area">
+          <canvas ref={canvasRef} />
+        </div>
+        <Controls worldRunner={worldRunner}></Controls>
+      </div>
       {/* </AppContext.Provider> */}
     </div>
   );

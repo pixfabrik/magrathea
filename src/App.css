@@ -1,8 +1,0 @@
-.App {
-  display: flex;
-
-  canvas {
-    flex-grow: 1;
-    image-rendering: pixelated;
-  }
-}

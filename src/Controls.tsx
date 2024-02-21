@@ -24,35 +24,35 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
     <div className="Controls">
       {/* <AppContext.Consumer>
         {(props: AppContextProps) => ( */}
-      <div
-        className="upload-button"
-        onClick={async () => {
-          const data = await importLbm(["lbm"]);
-          worldRunner.world.loadImage(data);
-        }}
-      >
-        Load Pixels
+      <div className="top-area">
+        <button
+          onClick={async () => {
+            const data = await importLbm(["lbm"]);
+            worldRunner.world.loadImage(data);
+          }}
+        >
+          Load Pixels (LBM)
+        </button>
+        <button
+          onClick={async () => {
+            const data = await importLbm(["bbm", "lbm"]);
+            worldRunner.world.loadColors(data);
+          }}
+        >
+          Load Palette (LBM, BBM)
+        </button>
+        <div>{makeTimeString(seconds)}</div>
+        <input
+          className="time-slider"
+          type="range"
+          min="0"
+          max={maxSeconds - 1}
+          value={seconds}
+          onChange={(event) => {
+            worldRunner.setSeconds(parseFloat(event.currentTarget.value));
+          }}
+        />
       </div>
-      <div
-        className="upload-button"
-        onClick={async () => {
-          const data = await importLbm(["bbm", "lbm"]);
-          worldRunner.world.loadColors(data);
-        }}
-      >
-        Load Palette
-      </div>
-      <div>{makeTimeString(seconds)}</div>
-      <input
-        className="time-slider"
-        type="range"
-        min="0"
-        max={maxSeconds - 1}
-        value={seconds}
-        onChange={(event) => {
-          worldRunner.setSeconds(parseFloat(event.currentTarget.value));
-        }}
-      />
       <div className="palette-area">
         {worldRunner.world &&
           worldRunner.world.paletteInfos.map(

@@ -19,6 +19,8 @@ export default class World {
 
   // ----------
   constructor() {
+    window.addEventListener("resize", this.handleResize);
+
     const data = localStorage.getItem(worldStorageKey);
     if (data) {
       try {
@@ -44,6 +46,11 @@ export default class World {
         console.error("Error parsing world data:", err);
       }
     }
+  }
+
+  // ----------
+  destroy() {
+    window.removeEventListener("resize", this.handleResize);
   }
 
   // ----------
@@ -117,12 +124,7 @@ export default class World {
   }
 
   // ----------
-  destroy() {}
-
-  // ----------
   setCanvas(canvas: HTMLCanvasElement) {
-    canvas.width = this.width;
-    canvas.height = this.height;
     this.ctx = canvas.getContext("2d")!;
     this.updateForImage();
   }
@@ -147,10 +149,29 @@ export default class World {
     this.pixelData = new Uint8ClampedArray(4 * this.width * this.height);
 
     if (this.ctx) {
-      this.ctx.canvas.width = this.width;
-      this.ctx.canvas.height = this.height;
+      const canvas = this.ctx.canvas;
+      canvas.width = this.width;
+      canvas.height = this.height;
+      this.handleResize();
     }
   }
+
+  // ----------
+  handleResize = () => {
+    if (this.ctx && this.width && this.height) {
+      const canvas = this.ctx.canvas;
+      const container = canvas.parentElement;
+      if (container) {
+        const containerAspect = container.clientWidth / container.clientHeight;
+        const imageAspect = this.width / this.height;
+        if (containerAspect > imageAspect) {
+          canvas.classList.add("height-bound");
+        } else {
+          canvas.classList.remove("height-bound");
+        }
+      }
+    }
+  };
 
   // ----------
   loadColors(data: LbmData) {

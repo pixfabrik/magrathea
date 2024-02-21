@@ -1,18 +1,20 @@
 .Controls {
+  flex-shrink: 0;
+  overflow-y: auto;
   width: 300px;
+  height: 100%;
   border-left: 1px solid #aaa;
 
-  .upload-button {
-    display: inline-block;
+  .top-area {
     padding: 10px;
-    margin: 0 0 0 10px;
-    border: 1px solid black;
-    border-radius: 8px;
-    cursor: pointer;
+
+    button {
+      margin: 0 10px 10px 0;
+    }
   }
 
   .palette-area {
-    margin: 20px 0 0 0;
+    margin: 0 0 0 0;
     border-bottom: 1px solid #aaa;
 
     button {
@@ -24,9 +26,10 @@
 
   .palette-info {
     border-top: 1px solid #aaa;
-    padding: 10px 0;
+    padding: 10px;
 
     .colors {
+      margin: 10px 0;
       display: flex;
       flex-wrap: wrap;
     }

@@ -1,0 +1,52 @@
+.App {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  flex-direction: column;
+  background: #333;
+  color: #999;
+  font-family: "Helvetica Neue", sans-serif;
+
+  button {
+    border: none;
+    outline: 1px solid #999;
+    color: #999;
+    background: #333;
+    padding: 5px 10px;
+    border-radius: 8px;
+  }
+
+  .top-nav {
+    height: 40px;
+    font-size: 20px;
+    line-height: 40px;
+    text-align: center;
+    border-bottom: #999 solid 1px;
+  }
+
+  .main-area {
+    display: flex;
+    position: relative;
+    overflow: hidden;
+    flex-grow: 1;
+  }
+
+  .canvas-area {
+    display: flex;
+    position: relative;
+    flex-grow: 1;
+    justify-content: center;
+    align-items: center;
+
+    canvas {
+      width: 95%;
+      image-rendering: pixelated;
+
+      &.height-bound {
+        width: auto;
+        height: 95%;
+      }
+    }
+  }
+}
