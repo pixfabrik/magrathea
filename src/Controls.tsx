@@ -27,19 +27,19 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
       <div className="top-area">
         <button
           onClick={async () => {
-            const data = await importLbm(["lbm"]);
+            const data = await importLbm(["lbm", "json"]);
             worldRunner.world.loadImage(data);
           }}
         >
-          Load Pixels (LBM)
+          Load Pixels (LBM, DPaint.JSON)
         </button>
         <button
           onClick={async () => {
-            const data = await importLbm(["bbm", "lbm"]);
+            const data = await importLbm(["bbm", "lbm", "json"]);
             worldRunner.world.loadColors(data);
           }}
         >
-          Load Palette (LBM, BBM)
+          Load Palette (LBM, BBM, DPaint.JSON)
         </button>
         <div>{makeTimeString(seconds)}</div>
         <input

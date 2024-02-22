@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { LbmCycle, LbmData, PaletteInfo } from "./types";
 import { mapLinear } from "./util";
-import { maxSeconds } from "./vars";
+import { maxSeconds, LBM_CYCLE_RATE_DIVISOR } from "./vars";
 
-const LBM_CYCLE_RATE_DIVISOR = 280;
 const worldStorageKey = "world";
 
 // ----------
@@ -139,7 +138,13 @@ export default class World {
   // ----------
   loadImage(data: LbmData) {
     if (data.pixels.length !== data.width * data.height) {
-      console.error("bad size");
+      console.error(
+        "bad size",
+        data.pixels.length,
+        data.width,
+        data.height,
+        data.width * data.height
+      );
       return;
     }
 

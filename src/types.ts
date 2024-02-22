@@ -22,3 +22,13 @@ export type PaletteInfo = {
   startSeconds: number;
   endSeconds: number;
 };
+
+export type DPaintJsCycle = {
+  active: boolean;
+  fps: number;
+  high: number;
+  index: number;
+  low: number;
+  max: number;
+  reverse: boolean;
+};
