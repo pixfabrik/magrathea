@@ -255,17 +255,27 @@ export default class World {
 
     this.isBad = false;
     this.paletteStatuses.length = 0;
-    for (let i = 0; i < this.paletteInfos.length - 1; i++) {
-      const paletteInfo = this.paletteInfos[i];
+
+    for (let i = 0; i < this.paletteInfos.length; i++) {
       this.paletteStatuses[i] = "good";
+    }
+
+    for (let i = 0; i < this.paletteInfos.length; i++) {
+      const paletteInfo = this.paletteInfos[i];
       if (paletteInfo.endSeconds < paletteInfo.startSeconds) {
         this.paletteStatuses[i] = "bad";
         this.isBad = true;
       }
-      // const nextPaletteInfo = this.paletteInfos[i + 1];
-      // if (paletteInfo.endSeconds !== nextPaletteInfo.startSeconds) {
-      //   paletteInfo.endSeconds = nextPaletteInfo.startSeconds;
-      // }
+
+      const nextPaletteInfo = this.paletteInfos[i + 1];
+      if (
+        nextPaletteInfo &&
+        paletteInfo.endSeconds > nextPaletteInfo.startSeconds
+      ) {
+        this.paletteStatuses[i] = "bad";
+        this.paletteStatuses[i + 1] = "bad";
+        this.isBad = true;
+      }
     }
   }
 
