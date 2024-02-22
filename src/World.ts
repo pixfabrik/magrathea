@@ -215,6 +215,17 @@ export default class World {
   }
 
   // ----------
+  updatePalette(paletteIndex: number, newInfo: Partial<PaletteInfo>) {
+    const paletteInfo = this.paletteInfos[paletteIndex];
+    Object.assign(paletteInfo, newInfo);
+    this.save();
+
+    if (this.onChange) {
+      this.onChange();
+    }
+  }
+
+  // ----------
   draw() {
     const { width, height, currentColors, pixels, ctx, pixelData } = this;
     if (!ctx || !width || !height || !currentColors.length) {

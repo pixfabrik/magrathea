@@ -2,7 +2,7 @@ import "./Controls.less";
 import React, { useEffect, useState } from "react";
 import WorldRunner from "./WorldRunner";
 import { PaletteInfo } from "./types";
-import { importLbm, makeTimeString } from "./util";
+import { getSecondsFromTimeString, importLbm, makeTimeString } from "./util";
 import { maxSeconds } from "./vars";
 
 type ControlsProps = {
@@ -58,9 +58,38 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
           worldRunner.world.paletteInfos.map(
             (paletteInfo: PaletteInfo, paletteIndex: number) => {
               return (
-                <div key={paletteInfo.startSeconds} className="palette-info">
-                  <div>Start: {makeTimeString(paletteInfo.startSeconds)}</div>
-                  <div>End: {makeTimeString(paletteInfo.endSeconds)}</div>
+                <div key={paletteIndex} className="palette-info">
+                  <div>
+                    Start:{" "}
+                    <input
+                      className="start-seconds"
+                      type="time"
+                      step="1"
+                      value={makeTimeString(paletteInfo.startSeconds, true)}
+                      onChange={(event) => {
+                        worldRunner.world.updatePalette(paletteIndex, {
+                          startSeconds: getSecondsFromTimeString(
+                            event.currentTarget.value
+                          ),
+                        });
+                      }}
+                    />
+                  </div>
+                  <div>
+                    End:{" "}
+                    <input
+                      type="time"
+                      step="1"
+                      value={makeTimeString(paletteInfo.endSeconds, true)}
+                      onChange={(event) => {
+                        worldRunner.world.updatePalette(paletteIndex, {
+                          endSeconds: getSecondsFromTimeString(
+                            event.currentTarget.value
+                          ),
+                        });
+                      }}
+                    />
+                  </div>
                   <div className="colors">
                     {paletteInfo.colors.map(
                       (color: number[], index: number) => {

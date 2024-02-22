@@ -5,6 +5,16 @@
   height: 100%;
   border-left: 1px solid #aaa;
 
+  input[type="time"] {
+    background: #333;
+    border: #999 1px solid;
+    color: #999;
+
+    &::-webkit-calendar-picker-indicator {
+      filter: invert(1) brightness(60%);
+    }
+  }
+
   .top-area {
     padding: 10px;
 
@@ -27,6 +37,10 @@
   .palette-info {
     border-top: 1px solid #aaa;
     padding: 10px;
+
+    .start-seconds {
+      margin: 0 0 5px 0;
+    }
 
     .colors {
       margin: 10px 0;

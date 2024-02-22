@@ -43,8 +43,11 @@ export function getDistance(x: number, y: number) {
 }
 
 // ----------
-export function makeTimeString(seconds: number) {
-  let mark = "am";
+export function makeTimeString(
+  seconds: number,
+  twentyFourHour: boolean = false
+) {
+  let mark = twentyFourHour ? "" : "am";
   let hours = seconds / (60 * 60);
   const minutes = (hours - Math.floor(hours)) * 60;
   const remainingSeconds = seconds % 60;
@@ -60,18 +63,38 @@ export function makeTimeString(seconds: number) {
   }
 
   hours = Math.floor(hours);
-  if (hours === 0) {
-    hours = 12;
-  } else if (hours === 12) {
-    mark = "pm";
-  } else if (hours >= 13) {
-    hours -= 12;
-    mark = "pm";
+
+  let hoursString: string;
+  if (twentyFourHour) {
+    hoursString = "" + hours;
+    if (hoursString.length === 1) {
+      hoursString = "0" + hoursString;
+    }
+  } else {
+    if (hours === 0) {
+      hours = 12;
+    } else if (hours === 12) {
+      mark = "pm";
+    } else if (hours >= 13) {
+      hours -= 12;
+      mark = "pm";
+    }
+
+    hoursString = "" + hours;
   }
 
-  const result = hours + ":" + minutesString + ":" + secondsString + mark;
-  // console.log("time:", seconds, result, hours, minutes, remainingSeconds);
+  const result = hoursString + ":" + minutesString + ":" + secondsString + mark;
+  console.log("time:", seconds, result, hours, minutes, remainingSeconds);
   return result;
+}
+
+// ----------
+export function getSecondsFromTimeString(timeString: string) {
+  const chunks = timeString.split(":");
+  const hours = parseFloat(chunks[0]);
+  const minutes = parseFloat(chunks[1]);
+  const seconds = parseFloat(chunks[2]);
+  return hours * 60 * 60 + minutes * 60 + seconds;
 }
 
 // ----------
