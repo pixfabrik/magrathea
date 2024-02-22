@@ -48,7 +48,7 @@ export function makeTimeString(
   seconds: number,
   twentyFourHour: boolean = false
 ) {
-  let mark = twentyFourHour ? "" : "am";
+  let mark = twentyFourHour ? "" : " AM";
   let hours = seconds / (60 * 60);
   const minutes = (hours - Math.floor(hours)) * 60;
   const remainingSeconds = seconds % 60;
@@ -75,10 +75,10 @@ export function makeTimeString(
     if (hours === 0) {
       hours = 12;
     } else if (hours === 12) {
-      mark = "pm";
+      mark = " PM";
     } else if (hours >= 13) {
       hours -= 12;
-      mark = "pm";
+      mark = " PM";
     }
 
     hoursString = "" + hours;
