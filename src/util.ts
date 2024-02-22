@@ -84,7 +84,7 @@ export function makeTimeString(
   }
 
   const result = hoursString + ":" + minutesString + ":" + secondsString + mark;
-  console.log("time:", seconds, result, hours, minutes, remainingSeconds);
+  // console.log("time:", seconds, result, hours, minutes, remainingSeconds);
   return result;
 }
 
@@ -116,8 +116,10 @@ export function importLbm(types: string[]): Promise<LbmData> {
         })
           .then((response) => response.json())
           .then((data) => {
-            // console.log("File uploaded successfully:", data);
-            resolve(data);
+            // console.log("File uploaded successfully:", data, file);
+            const { width, height, colors, pixels, cycles } = data;
+            const { name } = file;
+            resolve({ name, width, height, colors, pixels, cycles });
           })
           .catch((error) => {
             console.error("Error uploading file:", error);

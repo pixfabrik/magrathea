@@ -25,7 +25,10 @@ function App() {
   return (
     <div className="App">
       {/* <AppContext.Provider value={{ world, setWorld }}> */}
-      <div className="top-nav">Living Worlds Maker</div>
+      <div className="top-nav">
+        Living Worlds Maker
+        {worldRunner.world.name ? " - " + worldRunner.world.name : ""}
+      </div>
       <div className="main-area">
         <div className="canvas-area">
           <canvas ref={canvasRef} />

@@ -8,6 +8,7 @@ const worldStorageKey = "world";
 
 // ----------
 export default class World {
+  name: string = "";
   width: number = 0;
   height: number = 0;
   pixels: number[] = [];
@@ -28,6 +29,7 @@ export default class World {
     if (data) {
       try {
         const parsedData = JSON.parse(data);
+        this.name = parsedData.name;
         this.width = parsedData.width;
         this.height = parsedData.height;
         this.paletteInfos = parsedData.paletteInfos;
@@ -141,6 +143,7 @@ export default class World {
       return;
     }
 
+    this.name = data.name;
     this.width = data.width;
     this.height = data.height;
     this.pixels = data.pixels;
@@ -180,6 +183,17 @@ export default class World {
   };
 
   // ----------
+  getNextPaletteId() {
+    let id = 1;
+    for (const paletteInfo of this.paletteInfos) {
+      if (paletteInfo.id >= id) {
+        id = paletteInfo.id + 1;
+      }
+    }
+    return id;
+  }
+
+  // ----------
   loadColors(data: LbmData) {
     let seconds = 0;
     if (this.paletteInfos.length) {
@@ -189,6 +203,8 @@ export default class World {
     }
 
     const endPaletteInfo = {
+      id: this.getNextPaletteId(),
+      name: data.name,
       colors: data.colors,
       cycles: data.cycles.filter((cycle) => cycle.low !== cycle.high),
       startSeconds: seconds,
@@ -298,6 +314,7 @@ export default class World {
   // ----------
   save() {
     const data = {
+      name: this.name,
       width: this.width,
       height: this.height,
       paletteInfos: this.paletteInfos,

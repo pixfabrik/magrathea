@@ -59,13 +59,14 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
             (paletteInfo: PaletteInfo, paletteIndex: number) => {
               return (
                 <div
-                  key={paletteIndex}
+                  key={paletteInfo.id}
                   className={`palette-info ${
                     worldRunner.world.paletteStatuses[paletteIndex] === "bad"
                       ? "bad"
                       : ""
                   }`}
                 >
+                  <div className="name">{paletteInfo.name}</div>
                   <div>
                     Start:{" "}
                     <input

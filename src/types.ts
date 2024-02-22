@@ -6,6 +6,7 @@ export type LbmCycle = {
 };
 
 export type LbmData = {
+  name: string;
   width: number;
   height: number;
   colors: number[][];
@@ -14,6 +15,8 @@ export type LbmData = {
 };
 
 export type PaletteInfo = {
+  id: number;
+  name: string;
   colors: number[][];
   cycles: LbmCycle[];
   startSeconds: number;
