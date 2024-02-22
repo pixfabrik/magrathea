@@ -1,7 +1,10 @@
 # Living Worlds Maker
 
-- `nodemon`
-- `npx vite build --watch`
+## Running
+
+Requires Node. First time, do an `npm install`. After that, to run:
+
+`npm run dev`
 
 ## TODO
 
@@ -9,26 +12,9 @@
 - Optimize cycling so we only touch the pixels that need to change
 - What to do during transition if there are different cycles between palettes?
 - Support reverse 4
-- Stop stretching the canvas if the sidebar gets long
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: "latest",
-    sourceType: "module",
-    project: ["./tsconfig.json", "./tsconfig.node.json"],
-    tsconfigRootDir: __dirname,
-  },
-};
-```
-
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+- Normalize our cycle data so it's not LBM specific
+- Support 24 hour clock if the locale is using it
+- The AM/PM in the time controls are getting clipped by the clock icon
+- Import/Export
+- Customize ESLint so it doesn't complain about unused variables
+- Enable Typescript on server-side
