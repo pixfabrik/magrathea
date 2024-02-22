@@ -15,6 +15,9 @@ export default class World {
   ctx: CanvasRenderingContext2D | null = null;
   pixelData: Uint8ClampedArray = new Uint8ClampedArray(0);
   paletteInfos: PaletteInfo[] = [];
+  paletteStatuses: ("good" | "bad")[] = [];
+  isBad: boolean = false;
+  firstDraw: boolean = true;
   onChange: (() => void) | null = null;
 
   // ----------
@@ -37,6 +40,8 @@ export default class World {
           paletteInfo.startSeconds %= maxSeconds;
           paletteInfo.endSeconds %= maxSeconds;
         }
+
+        this.sortPalettes();
 
         this.pixels = parsedData.pixels;
         this.updateForImage();
@@ -146,6 +151,7 @@ export default class World {
 
   // ----------
   updateForImage() {
+    this.firstDraw = true;
     this.pixelData = new Uint8ClampedArray(4 * this.width * this.height);
 
     if (this.ctx) {
@@ -218,6 +224,8 @@ export default class World {
   updatePalette(paletteIndex: number, newInfo: Partial<PaletteInfo>) {
     const paletteInfo = this.paletteInfos[paletteIndex];
     Object.assign(paletteInfo, newInfo);
+
+    this.sortPalettes();
     this.save();
 
     if (this.onChange) {
@@ -226,11 +234,48 @@ export default class World {
   }
 
   // ----------
+  sortPalettes() {
+    this.paletteInfos.sort((a, b) => a.startSeconds - b.startSeconds);
+
+    this.isBad = false;
+    this.paletteStatuses.length = 0;
+    for (let i = 0; i < this.paletteInfos.length - 1; i++) {
+      const paletteInfo = this.paletteInfos[i];
+      this.paletteStatuses[i] = "good";
+      if (paletteInfo.endSeconds < paletteInfo.startSeconds) {
+        this.paletteStatuses[i] = "bad";
+        this.isBad = true;
+      }
+      // const nextPaletteInfo = this.paletteInfos[i + 1];
+      // if (paletteInfo.endSeconds !== nextPaletteInfo.startSeconds) {
+      //   paletteInfo.endSeconds = nextPaletteInfo.startSeconds;
+      // }
+    }
+  }
+
+  // ----------
   draw() {
-    const { width, height, currentColors, pixels, ctx, pixelData } = this;
-    if (!ctx || !width || !height || !currentColors.length) {
+    const {
+      width,
+      height,
+      currentColors,
+      pixels,
+      ctx,
+      pixelData,
+      isBad,
+      firstDraw,
+    } = this;
+    if (
+      !ctx ||
+      !width ||
+      !height ||
+      !currentColors.length ||
+      (isBad && !firstDraw)
+    ) {
       return;
     }
+
+    this.firstDraw = false;
 
     for (let i = 0; i < pixels.length; i++) {
       const pixel = pixels[i];
