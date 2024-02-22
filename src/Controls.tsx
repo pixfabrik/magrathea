@@ -16,7 +16,7 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
     worldRunner.onChange = () => {
       setChangeCount(changeCount + 1);
     };
-  }, [changeCount]);
+  }, [changeCount, worldRunner]);
 
   const seconds = worldRunner.getSeconds();
 

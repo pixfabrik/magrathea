@@ -100,7 +100,7 @@ export function getSecondsFromTimeString(timeString: string) {
 
 // ----------
 export function importLbm(types: string[]): Promise<LbmData> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, _reject) => {
     const fileInput = document.createElement("input");
     fileInput.type = "file";
     fileInput.accept = types.map((type) => `.${type}`).join(",");
