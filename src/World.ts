@@ -1,6 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { LbmCycle, LbmData, PaletteInfo } from "./types";
-import { mapLinear } from "./util";
+import { saveAs } from "file-saver";
+import {
+  LbmCycle,
+  LbmData,
+  PaletteInfo,
+  StorageContainer,
+  StorageData,
+} from "./types";
+import { importFile, mapLinear } from "./util";
 import { maxSeconds, LBM_CYCLE_RATE_DIVISOR } from "./vars";
 
 const worldStorageKey = "world";
@@ -24,30 +31,15 @@ export default class World {
   constructor() {
     window.addEventListener("resize", this.handleResize);
 
-    const data = localStorage.getItem(worldStorageKey);
-    if (data) {
+    const storage = localStorage.getItem(worldStorageKey);
+    if (storage) {
       try {
-        const parsedData = JSON.parse(data);
-        this.name = parsedData.name;
-        this.width = parsedData.width;
-        this.height = parsedData.height;
-        this.paletteInfos = parsedData.paletteInfos;
-
-        for (const paletteInfo of this.paletteInfos) {
-          if (paletteInfo.endSeconds === null) {
-            paletteInfo.endSeconds = maxSeconds - 1;
-          }
-
-          paletteInfo.startSeconds %= maxSeconds;
-          paletteInfo.endSeconds %= maxSeconds;
+        const parsedStorage = JSON.parse(storage);
+        if (typeof parsedStorage === "object") {
+          // console.log("storage", typeof parsedStorage, parsedStorage);
+          const parsedData = parsedStorage.data || parsedStorage;
+          this.ingestData(parsedData);
         }
-
-        this.sortPalettes();
-
-        this.pixels = parsedData.pixels;
-        this.updateForImage();
-
-        // console.log(this.paletteInfos);
       } catch (err) {
         console.error("Error parsing world data:", err);
       }
@@ -327,15 +319,96 @@ export default class World {
   }
 
   // ----------
-  save() {
-    const data = {
-      name: this.name,
-      width: this.width,
-      height: this.height,
-      paletteInfos: this.paletteInfos,
-      pixels: this.pixels,
+  serialize() {
+    const object = {
+      format: {
+        version: 1,
+        type: "Magrathea World",
+      },
+      data: {
+        name: this.name,
+        width: this.width,
+        height: this.height,
+        paletteInfos: this.paletteInfos,
+        pixels: this.pixels,
+      },
     };
 
-    localStorage.setItem(worldStorageKey, JSON.stringify(data));
+    return JSON.stringify(object);
+  }
+
+  // ----------
+  save() {
+    localStorage.setItem(worldStorageKey, this.serialize());
+  }
+
+  // ----------
+  doExport() {
+    const blob = new Blob([this.serialize()], {
+      type: "application/json;charset=utf-8",
+    });
+
+    const isoDate = new Date().toISOString().split("T")[0];
+    saveAs(blob, `Magrathea World ${isoDate}.json`);
+  }
+
+  // ----------
+  async doImport() {
+    try {
+      const fileData = (await importFile(["json"])) as
+        | Partial<StorageContainer>
+        | File;
+      if (fileData instanceof File) {
+        throw new Error("Wrong file type.");
+      }
+
+      if (!fileData.format || fileData.format.type !== "Magrathea World") {
+        throw new Error("Wrong file type.");
+      }
+
+      if (fileData.format.version !== 1) {
+        throw new Error("Wrong file version.");
+      }
+
+      if (!fileData.data) {
+        throw new Error("Damaged file.");
+      }
+
+      this.ingestData(fileData.data);
+
+      this.save();
+
+      if (this.onChange) {
+        this.onChange();
+      }
+    } catch (err) {
+      alert("Error importing: " + err);
+    }
+  }
+
+  // ----------
+  ingestData(parsedData: StorageData) {
+    this.name = parsedData.name;
+    this.width = parsedData.width;
+    this.height = parsedData.height;
+    this.paletteInfos = parsedData.paletteInfos;
+
+    // console.log(parsedData);
+
+    for (const paletteInfo of this.paletteInfos) {
+      if (paletteInfo.endSeconds === null) {
+        paletteInfo.endSeconds = maxSeconds - 1;
+      }
+
+      paletteInfo.startSeconds %= maxSeconds;
+      paletteInfo.endSeconds %= maxSeconds;
+    }
+
+    this.sortPalettes();
+
+    this.pixels = parsedData.pixels;
+    this.updateForImage();
+
+    // console.log(this.paletteInfos);
   }
 }

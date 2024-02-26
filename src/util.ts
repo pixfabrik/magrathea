@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { LbmData, LbmCycle, DPaintJsCycle } from "./types";
+import { LbmData, LbmCycle, DPaintJsCycle, DPaintJsData } from "./types";
 import { LBM_CYCLE_RATE_DIVISOR } from "./vars";
 
 // ----------
@@ -99,7 +99,7 @@ export function getSecondsFromTimeString(timeString: string) {
 }
 
 // ----------
-export function importLbm(types: string[]): Promise<LbmData> {
+export function importFile(types: string[]): Promise<File | object> {
   return new Promise((resolve, _reject) => {
     const fileInput = document.createElement("input");
     fileInput.type = "file";
@@ -110,52 +110,65 @@ export function importLbm(types: string[]): Promise<LbmData> {
       if (file) {
         if (file.type === "application/json") {
           const reader = new FileReader();
+
           reader.onload = () => {
             const data = JSON.parse(reader.result as string);
-            // console.log(data);
-            const cycles: LbmCycle[] = data.colorRange.map(
-              (range: DPaintJsCycle) => {
-                return {
-                  low: range.low,
-                  high: range.high,
-                  rate: range.fps * LBM_CYCLE_RATE_DIVISOR,
-                  reverse: range.reverse ? 2 : 0,
-                };
-              }
-            );
-            resolve({
-              name: data.image.name,
-              width: data.image.width,
-              height: data.image.height,
-              colors: data.palette,
-              pixels: data.indexedPixels.flat(),
-              cycles,
-            });
+            resolve(data);
           };
 
           reader.readAsText(file);
         } else {
-          const formData = new FormData();
-          formData.append("fileInput", file);
-
-          fetch("/upload", {
-            method: "POST",
-            body: formData,
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              // console.log("File uploaded successfully:", data, file);
-              const { width, height, colors, pixels, cycles } = data;
-              const { name } = file;
-              resolve({ name, width, height, colors, pixels, cycles });
-            })
-            .catch((error) => {
-              console.error("Error uploading file:", error);
-            });
+          resolve(file);
         }
       }
     };
 
     fileInput.click();
   });
+}
+
+// ----------
+export async function importLbm(types: string[]): Promise<LbmData> {
+  const file = await importFile(types);
+
+  if (file instanceof File) {
+    const formData = new FormData();
+    formData.append("fileInput", file);
+
+    try {
+      const response = await fetch("/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      // console.log("File uploaded successfully:", data, file);
+      const { width, height, colors, pixels, cycles } = data;
+      const { name } = file;
+      return { name, width, height, colors, pixels, cycles };
+    } catch (error) {
+      console.error("Error uploading file:", error);
+    }
+  }
+
+  const data = file as DPaintJsData;
+  // console.log(data);
+
+  const cycles: LbmCycle[] = data.colorRange.map((range: DPaintJsCycle) => {
+    return {
+      low: range.low,
+      high: range.high,
+      rate: range.fps * LBM_CYCLE_RATE_DIVISOR,
+      reverse: range.reverse ? 2 : 0,
+    };
+  });
+
+  return {
+    name: data.image.name,
+    width: data.image.width,
+    height: data.image.height,
+    colors: data.palette,
+    pixels: data.indexedPixels.flat(),
+    cycles,
+  };
 }

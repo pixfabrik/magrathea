@@ -41,6 +41,20 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
         >
           Load Palette (LBM, BBM, DPaint.JSON)
         </button>
+        <button
+          onClick={async () => {
+            worldRunner.world.doImport();
+          }}
+        >
+          Import World
+        </button>
+        <button
+          onClick={async () => {
+            worldRunner.world.doExport();
+          }}
+        >
+          Export World
+        </button>
         <div>{makeTimeString(seconds)}</div>
         <input
           className="time-slider"
