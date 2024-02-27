@@ -20,6 +20,10 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
 
   const seconds = worldRunner.getSeconds();
 
+  setTimeout(() => {
+    setChangeCount(changeCount + 1);
+  }, 1000);
+
   return (
     <div className="Controls">
       {/* <AppContext.Consumer>
