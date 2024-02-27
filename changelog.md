@@ -1,3 +1,5 @@
+# Magrathea Change Log
+
 2:
 
 - Added import/export for worlds.

@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import WorldRunner from "./WorldRunner";
 import Controls from "./Controls";
 
+const VERSION = 2;
+
 const worldRunner = new WorldRunner();
 
 function App() {
@@ -28,6 +30,13 @@ function App() {
       <div className="top-nav">
         Living Worlds Maker
         {worldRunner.world.name ? " - " + worldRunner.world.name : ""}
+        <a
+          className="version"
+          href="https://github.com/pixfabrik/magrathea/blob/main/changelog.md"
+          target="_blank"
+        >
+          v{VERSION}
+        </a>
       </div>
       <div className="main-area">
         <div className="canvas-area">

@@ -8,7 +8,12 @@ import {
   StorageData,
 } from "./types";
 import { importFile, mapLinear } from "./util";
-import { maxSeconds, LBM_CYCLE_RATE_DIVISOR } from "./vars";
+import {
+  maxSeconds,
+  LBM_CYCLE_RATE_DIVISOR,
+  WORLD_DATA_VERSION,
+  WORLD_DATA_TYPE,
+} from "./vars";
 
 const worldStorageKey = "world";
 
@@ -322,8 +327,8 @@ export default class World {
   serialize() {
     const object = {
       format: {
-        version: 1,
-        type: "Magrathea World",
+        version: WORLD_DATA_VERSION,
+        type: WORLD_DATA_TYPE,
       },
       data: {
         name: this.name,
@@ -362,11 +367,11 @@ export default class World {
         throw new Error("Wrong file type.");
       }
 
-      if (!fileData.format || fileData.format.type !== "Magrathea World") {
+      if (!fileData.format || fileData.format.type !== WORLD_DATA_TYPE) {
         throw new Error("Wrong file type.");
       }
 
-      if (fileData.format.version !== 1) {
+      if (fileData.format.version !== WORLD_DATA_VERSION) {
         throw new Error("Wrong file version.");
       }
 
