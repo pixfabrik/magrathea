@@ -8,6 +8,10 @@ Requires Node. First time, do an `npm install`. After that, to run:
 
 ## TODO
 
+### Next
+
+### Backlog
+
 - Cycle blending
 - Optimize cycling so we only touch the pixels that need to change
 - What to do during transition if there are different cycles between palettes?
