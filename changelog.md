@@ -3,6 +3,7 @@
 4:
 
 - Now honoring the "active" flag on cycles imported from DPaintJS.
+- Better error reporting for opening files.
 
 3:
 

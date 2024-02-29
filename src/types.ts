@@ -35,6 +35,7 @@ export type DPaintJsCycle = {
 };
 
 export type DPaintJsData = {
+  type: string;
   colorRange: DPaintJsCycle[];
   image: {
     name: string;

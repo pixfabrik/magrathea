@@ -1,7 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { LbmData, LbmCycle, DPaintJsCycle, DPaintJsData } from "./types";
-import { LBM_CYCLE_RATE_DIVISOR } from "./vars";
+import {
+  LbmData,
+  LbmCycle,
+  DPaintJsCycle,
+  DPaintJsData,
+  StorageContainer,
+} from "./types";
+import { LBM_CYCLE_RATE_DIVISOR, WORLD_DATA_TYPE } from "./vars";
 
 // ----------
 export function mapLinear(
@@ -135,24 +141,33 @@ export async function importLbm(types: string[]): Promise<LbmData> {
     const formData = new FormData();
     formData.append("fileInput", file);
 
-    try {
-      const response = await fetch("/upload", {
-        method: "POST",
-        body: formData,
-      });
+    const response = await fetch("/upload", {
+      method: "POST",
+      body: formData,
+    });
 
-      const data = await response.json();
-      // console.log("File uploaded successfully:", data, file);
-      const { width, height, colors, pixels, cycles } = data;
-      const { name } = file;
-      return { name, width, height, colors, pixels, cycles };
-    } catch (error) {
-      console.error("Error uploading file:", error);
-    }
+    const data = await response.json();
+    // console.log("File uploaded successfully:", data, file);
+    const { width, height, colors, pixels, cycles } = data;
+    const { name } = file;
+    return { name, width, height, colors, pixels, cycles };
   }
 
   const data = file as DPaintJsData;
   // console.log(data);
+
+  if (data.type !== "dpaint") {
+    const worldData = data as Partial<StorageContainer>;
+    if (worldData.format && worldData.format.type === WORLD_DATA_TYPE) {
+      throw new Error("This is a world file, not pixels.");
+    } else {
+      throw new Error("This is not a DPaintJS file.");
+    }
+  }
+
+  if (!data.indexedPixels) {
+    throw new Error("No pixels found; add color cycles and save again.");
+  }
 
   const cycles: LbmCycle[] = data.colorRange
     .filter((range: DPaintJsCycle) => !!range.active)
