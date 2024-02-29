@@ -154,14 +154,16 @@ export async function importLbm(types: string[]): Promise<LbmData> {
   const data = file as DPaintJsData;
   // console.log(data);
 
-  const cycles: LbmCycle[] = data.colorRange.map((range: DPaintJsCycle) => {
-    return {
-      low: range.low,
-      high: range.high,
-      rate: range.fps * LBM_CYCLE_RATE_DIVISOR,
-      reverse: range.reverse ? 2 : 0,
-    };
-  });
+  const cycles: LbmCycle[] = data.colorRange
+    .filter((range: DPaintJsCycle) => !!range.active)
+    .map((range: DPaintJsCycle) => {
+      return {
+        low: range.low,
+        high: range.high,
+        rate: range.fps * LBM_CYCLE_RATE_DIVISOR,
+        reverse: range.reverse ? 2 : 0,
+      };
+    });
 
   return {
     name: data.image.name,

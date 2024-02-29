@@ -31,6 +31,7 @@ export type DPaintJsCycle = {
   low: number;
   max: number;
   reverse: boolean;
+  rate: number;
 };
 
 export type DPaintJsData = {

@@ -1,5 +1,9 @@
 # Magrathea Change Log
 
+4:
+
+- Now honoring the "active" flag on cycles imported from DPaintJS.
+
 3:
 
 - Added version number to top nav. If you click it, it goes to the changelog.

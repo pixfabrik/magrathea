@@ -10,6 +10,8 @@ Requires Node. First time, do an `npm install`. After that, to run:
 
 ### Next
 
+- Layers
+
 ### Backlog
 
 - Cycle blending
