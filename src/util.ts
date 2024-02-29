@@ -6,6 +6,7 @@ import {
   DPaintJsCycle,
   DPaintJsData,
   StorageContainer,
+  ObjectWithId,
 } from "./types";
 import { LBM_CYCLE_RATE_DIVISOR, WORLD_DATA_TYPE } from "./vars";
 
@@ -102,6 +103,18 @@ export function getSecondsFromTimeString(timeString: string) {
   const minutes = parseFloat(chunks[1]);
   const seconds = parseFloat(chunks[2]);
   return hours * 60 * 60 + minutes * 60 + seconds;
+}
+
+// ----------
+export function getNextId(items: ObjectWithId[]) {
+  let id = 1;
+  for (const item of items) {
+    if (item.id >= id) {
+      id = item.id + 1;
+    }
+  }
+
+  return id;
 }
 
 // ----------

@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import "./Controls.less";
 import React, { useEffect, useState } from "react";
 import WorldRunner from "./WorldRunner";
-import { PaletteInfo } from "./types";
+import { OverlayInfo, PaletteInfo } from "./types";
 import { getSecondsFromTimeString, importLbm, makeTimeString } from "./util";
 import { maxSeconds } from "./vars";
 
@@ -11,14 +12,16 @@ type ControlsProps = {
 
 const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
   const [changeCount, setChangeCount] = useState<number>(0);
+  const [paletteAreaOpen, setPaletteAreaOpen] = useState<boolean>(false);
+  const [overlayAreaOpen, setOverlayAreaOpen] = useState<boolean>(false);
+  const seconds = worldRunner.getSeconds();
+  const world = worldRunner.world;
 
   useEffect(() => {
     worldRunner.onChange = () => {
       setChangeCount(changeCount + 1);
     };
   }, [changeCount, worldRunner]);
-
-  const seconds = worldRunner.getSeconds();
 
   setTimeout(() => {
     setChangeCount(changeCount + 1);
@@ -33,19 +36,31 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
           onClick={async () => {
             try {
               const data = await importLbm(["lbm", "json"]);
-              worldRunner.world.loadImage(data);
+              world.loadImage(data);
             } catch (err) {
               alert(err);
             }
           }}
         >
-          Load Pixels (LBM, DPaint.JSON)
+          Load Base Pixels (LBM, DPaint.JSON)
+        </button>
+        <button
+          onClick={async () => {
+            try {
+              const data = await importLbm(["lbm", "json"]);
+              world.loadOverlay(data);
+            } catch (err) {
+              alert(err);
+            }
+          }}
+        >
+          Load Overlay Pixels (LBM, DPaint.JSON)
         </button>
         <button
           onClick={async () => {
             try {
               const data = await importLbm(["bbm", "lbm", "json"]);
-              worldRunner.world.loadColors(data);
+              world.loadColors(data);
             } catch (err) {
               alert(err);
             }
@@ -55,14 +70,14 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
         </button>
         <button
           onClick={async () => {
-            worldRunner.world.doImport();
+            world.doImport();
           }}
         >
           Import World
         </button>
         <button
           onClick={async () => {
-            worldRunner.world.doExport();
+            world.doExport();
           }}
         >
           Export World
@@ -79,17 +94,23 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
           }}
         />
       </div>
-      <div className="palette-area">
-        {worldRunner.world &&
-          worldRunner.world.paletteInfos.map(
+      <div className="resource-area">
+        <div
+          className="area-title"
+          onClick={() => {
+            setPaletteAreaOpen(!paletteAreaOpen);
+          }}
+        >
+          Palettes ({world.paletteInfos.length})
+        </div>
+        {paletteAreaOpen &&
+          world.paletteInfos.map(
             (paletteInfo: PaletteInfo, paletteIndex: number) => {
               return (
                 <div
                   key={paletteInfo.id}
-                  className={`palette-info ${
-                    worldRunner.world.paletteStatuses[paletteIndex] === "bad"
-                      ? "bad"
-                      : ""
+                  className={`resource-info ${
+                    world.paletteStatuses[paletteIndex] === "bad" ? "bad" : ""
                   }`}
                 >
                   <div className="name">{paletteInfo.name}</div>
@@ -101,7 +122,7 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                       step="1"
                       value={makeTimeString(paletteInfo.startSeconds, true)}
                       onChange={(event) => {
-                        worldRunner.world.updatePalette(paletteIndex, {
+                        world.updatePalette(paletteIndex, {
                           startSeconds: getSecondsFromTimeString(
                             event.currentTarget.value
                           ),
@@ -116,7 +137,7 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                       step="1"
                       value={makeTimeString(paletteInfo.endSeconds, true)}
                       onChange={(event) => {
-                        worldRunner.world.updatePalette(paletteIndex, {
+                        world.updatePalette(paletteIndex, {
                           endSeconds: getSecondsFromTimeString(
                             event.currentTarget.value
                           ),
@@ -155,7 +176,34 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                   </button>
                   <button
                     onClick={() => {
-                      worldRunner.world.deletePalette(paletteIndex);
+                      world.deletePalette(paletteIndex);
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              );
+            }
+          )}
+      </div>
+      <div className="resource-area">
+        <div
+          className="area-title"
+          onClick={() => {
+            setOverlayAreaOpen(!overlayAreaOpen);
+          }}
+        >
+          Overlays ({world.overlays.length})
+        </div>
+        {overlayAreaOpen &&
+          world.overlays.map(
+            (overlayInfo: OverlayInfo, overlayIndex: number) => {
+              return (
+                <div key={overlayInfo.id} className={`resource-info`}>
+                  <div className="name">{overlayInfo.name}</div>
+                  <button
+                    onClick={() => {
+                      world.deleteOverlay(overlayIndex);
                     }}
                   >
                     Delete

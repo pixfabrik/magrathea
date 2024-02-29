@@ -1,3 +1,7 @@
+export type ObjectWithId = {
+  id: number;
+};
+
 export type LbmCycle = {
   low: number;
   high: number;
@@ -46,12 +50,21 @@ export type DPaintJsData = {
   indexedPixels: number[][];
 };
 
+export type OverlayInfo = {
+  id: number;
+  name: string;
+  width: number;
+  height: number;
+  pixels: number[];
+};
+
 export type StorageData = {
   name: string;
   width: number;
   height: number;
   paletteInfos: PaletteInfo[];
   pixels: number[];
+  overlays: OverlayInfo[];
 };
 
 export type StorageContainer = {

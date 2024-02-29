@@ -3,11 +3,12 @@ import { saveAs } from "file-saver";
 import {
   LbmCycle,
   LbmData,
+  OverlayInfo,
   PaletteInfo,
   StorageContainer,
   StorageData,
 } from "./types";
-import { importFile, mapLinear } from "./util";
+import { getNextId, importFile, mapLinear } from "./util";
 import {
   maxSeconds,
   LBM_CYCLE_RATE_DIVISOR,
@@ -23,6 +24,7 @@ export default class World {
   width: number = 0;
   height: number = 0;
   pixels: number[] = [];
+  overlays: OverlayInfo[] = [];
   currentColors: number[][] = [];
   ctx: CanvasRenderingContext2D | null = null;
   pixelData: Uint8ClampedArray = new Uint8ClampedArray(0);
@@ -168,6 +170,34 @@ export default class World {
   }
 
   // ----------
+  loadOverlay(data: LbmData) {
+    this.overlays.push({
+      id: getNextId(this.overlays),
+      name: data.name,
+      width: data.width,
+      height: data.height,
+      pixels: data.pixels,
+    });
+
+    this.handleChange();
+  }
+
+  // ----------
+  deleteOverlay(overlayIndex: number) {
+    this.overlays.splice(overlayIndex, 1);
+    this.handleChange();
+  }
+
+  // ----------
+  handleChange() {
+    this.save();
+
+    if (this.onChange) {
+      this.onChange();
+    }
+  }
+
+  // ----------
   handleResize = () => {
     if (this.ctx && this.width && this.height) {
       const canvas = this.ctx.canvas;
@@ -185,17 +215,6 @@ export default class World {
   };
 
   // ----------
-  getNextPaletteId() {
-    let id = 1;
-    for (const paletteInfo of this.paletteInfos) {
-      if (paletteInfo.id >= id) {
-        id = paletteInfo.id + 1;
-      }
-    }
-    return id;
-  }
-
-  // ----------
   loadColors(data: LbmData) {
     let seconds = 0;
     if (this.paletteInfos.length) {
@@ -205,7 +224,7 @@ export default class World {
     }
 
     const endPaletteInfo = {
-      id: this.getNextPaletteId(),
+      id: getNextId(this.paletteInfos),
       name: data.name,
       colors: data.colors,
       cycles: data.cycles.filter((cycle) => cycle.low !== cycle.high),
@@ -220,22 +239,13 @@ export default class World {
     }
 
     this.paletteInfos.push(endPaletteInfo);
-
-    this.save();
-
-    if (this.onChange) {
-      this.onChange();
-    }
+    this.handleChange();
   }
 
   // ----------
   deletePalette(paletteIndex: number) {
     this.paletteInfos.splice(paletteIndex, 1);
-    this.save();
-
-    if (this.onChange) {
-      this.onChange();
-    }
+    this.handleChange();
   }
 
   // ----------
@@ -244,11 +254,7 @@ export default class World {
     Object.assign(paletteInfo, newInfo);
 
     this.sortPalettes();
-    this.save();
-
-    if (this.onChange) {
-      this.onChange();
-    }
+    this.handleChange();
   }
 
   // ----------
@@ -317,6 +323,28 @@ export default class World {
       }
     }
 
+    for (const overlay of this.overlays) {
+      let x = 0;
+      let y = 0;
+      for (let i = 0; i < overlay.pixels.length; i++) {
+        const pixel = overlay.pixels[i];
+        const color = currentColors[pixel];
+        if (pixel && color && x < width && y < height) {
+          const p = (x + y * width) * 4;
+          pixelData[p] = color[0]; // Red channel
+          pixelData[p + 1] = color[1]; // Green channel
+          pixelData[p + 2] = color[2]; // Blue channel
+          pixelData[p + 3] = 255; // Alpha channel (opacity)
+        }
+
+        x++;
+        if (x >= overlay.width) {
+          x = 0;
+          y++;
+        }
+      }
+    }
+
     // Create an ImageData object with the pixel data
     const imageData = new ImageData(pixelData, width, height);
 
@@ -336,6 +364,7 @@ export default class World {
         height: this.height,
         paletteInfos: this.paletteInfos,
         pixels: this.pixels,
+        overlays: this.overlays,
       },
     };
 
@@ -380,12 +409,7 @@ export default class World {
       }
 
       this.ingestData(fileData.data);
-
-      this.save();
-
-      if (this.onChange) {
-        this.onChange();
-      }
+      this.handleChange();
     } catch (err) {
       alert("Error importing: " + err);
     }
@@ -397,6 +421,7 @@ export default class World {
     this.width = parsedData.width;
     this.height = parsedData.height;
     this.paletteInfos = parsedData.paletteInfos;
+    this.overlays = parsedData.overlays || [];
 
     // console.log(parsedData);
 
