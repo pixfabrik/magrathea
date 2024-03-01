@@ -1,13 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { saveAs } from "file-saver";
-import {
-  LbmCycle,
-  LbmData,
-  OverlayInfo,
-  PaletteInfo,
-  StorageContainer,
-  StorageData,
-} from "./types";
+import { LbmCycle, LbmData, StorageContainer } from "./types";
+import { getEmptyWorldData, PaletteInfo, WorldData } from "./WorldData";
 import { getNextId, importFile, mapLinear } from "./util";
 import {
   maxSeconds,
@@ -20,15 +14,10 @@ const worldStorageKey = "world";
 
 // ----------
 export default class World {
-  name: string = "";
-  width: number = 0;
-  height: number = 0;
-  pixels: number[] = [];
-  overlays: OverlayInfo[] = [];
+  data: WorldData = getEmptyWorldData();
   currentColors: number[][] = [];
   ctx: CanvasRenderingContext2D | null = null;
   pixelData: Uint8ClampedArray = new Uint8ClampedArray(0);
-  paletteInfos: PaletteInfo[] = [];
   paletteStatuses: ("good" | "bad")[] = [];
   isBad: boolean = false;
   firstDraw: boolean = true;
@@ -60,11 +49,12 @@ export default class World {
 
   // ----------
   frame(nowSeconds: number) {
+    const { paletteInfos } = this.data;
     // Find current palette infos
     let startPaletteInfo: PaletteInfo | null = null,
       endPaletteInfo: PaletteInfo | null = null;
 
-    for (const paletteInfo of this.paletteInfos) {
+    for (const paletteInfo of paletteInfos) {
       if (nowSeconds >= paletteInfo.startSeconds) {
         startPaletteInfo = paletteInfo;
 
@@ -147,10 +137,10 @@ export default class World {
       return;
     }
 
-    this.name = data.name;
-    this.width = data.width;
-    this.height = data.height;
-    this.pixels = data.pixels;
+    this.data.name = data.name;
+    this.data.width = data.width;
+    this.data.height = data.height;
+    this.data.pixels = data.pixels;
 
     this.updateForImage();
     this.loadColors(data);
@@ -158,21 +148,23 @@ export default class World {
 
   // ----------
   updateForImage() {
+    const { width, height } = this.data;
     this.firstDraw = true;
-    this.pixelData = new Uint8ClampedArray(4 * this.width * this.height);
+    this.pixelData = new Uint8ClampedArray(4 * width * height);
 
     if (this.ctx) {
       const canvas = this.ctx.canvas;
-      canvas.width = this.width;
-      canvas.height = this.height;
+      canvas.width = width;
+      canvas.height = height;
       this.handleResize();
     }
   }
 
   // ----------
   loadOverlay(data: LbmData) {
-    this.overlays.push({
-      id: getNextId(this.overlays),
+    const { overlays } = this.data;
+    overlays.push({
+      id: getNextId(overlays),
       name: data.name,
       width: data.width,
       height: data.height,
@@ -184,7 +176,8 @@ export default class World {
 
   // ----------
   deleteOverlay(overlayIndex: number) {
-    this.overlays.splice(overlayIndex, 1);
+    const { overlays } = this.data;
+    overlays.splice(overlayIndex, 1);
     this.handleChange();
   }
 
@@ -199,12 +192,13 @@ export default class World {
 
   // ----------
   handleResize = () => {
-    if (this.ctx && this.width && this.height) {
+    const { width, height } = this.data;
+    if (this.ctx && width && height) {
       const canvas = this.ctx.canvas;
       const container = canvas.parentElement;
       if (container) {
         const containerAspect = container.clientWidth / container.clientHeight;
-        const imageAspect = this.width / this.height;
+        const imageAspect = width / height;
         if (containerAspect > imageAspect) {
           canvas.classList.add("height-bound");
         } else {
@@ -216,15 +210,16 @@ export default class World {
 
   // ----------
   loadColors(data: LbmData) {
+    const { paletteInfos } = this.data;
     let seconds = 0;
-    if (this.paletteInfos.length) {
-      const startPaletteInfo = this.paletteInfos[this.paletteInfos.length - 1];
+    if (paletteInfos.length) {
+      const startPaletteInfo = paletteInfos[paletteInfos.length - 1];
       startPaletteInfo.endSeconds = startPaletteInfo.startSeconds + 60;
       seconds = startPaletteInfo.endSeconds + 5;
     }
 
     const endPaletteInfo = {
-      id: getNextId(this.paletteInfos),
+      id: getNextId(paletteInfos),
       name: data.name,
       colors: data.colors,
       cycles: data.cycles.filter((cycle) => cycle.low !== cycle.high),
@@ -238,19 +233,21 @@ export default class World {
       }
     }
 
-    this.paletteInfos.push(endPaletteInfo);
+    paletteInfos.push(endPaletteInfo);
     this.handleChange();
   }
 
   // ----------
   deletePalette(paletteIndex: number) {
-    this.paletteInfos.splice(paletteIndex, 1);
+    const { paletteInfos } = this.data;
+    paletteInfos.splice(paletteIndex, 1);
     this.handleChange();
   }
 
   // ----------
   updatePalette(paletteIndex: number, newInfo: Partial<PaletteInfo>) {
-    const paletteInfo = this.paletteInfos[paletteIndex];
+    const { paletteInfos } = this.data;
+    const paletteInfo = paletteInfos[paletteIndex];
     Object.assign(paletteInfo, newInfo);
 
     this.sortPalettes();
@@ -259,23 +256,24 @@ export default class World {
 
   // ----------
   sortPalettes() {
-    this.paletteInfos.sort((a, b) => a.startSeconds - b.startSeconds);
+    const { paletteInfos } = this.data;
+    paletteInfos.sort((a, b) => a.startSeconds - b.startSeconds);
 
     this.isBad = false;
     this.paletteStatuses.length = 0;
 
-    for (let i = 0; i < this.paletteInfos.length; i++) {
+    for (let i = 0; i < paletteInfos.length; i++) {
       this.paletteStatuses[i] = "good";
     }
 
-    for (let i = 0; i < this.paletteInfos.length; i++) {
-      const paletteInfo = this.paletteInfos[i];
+    for (let i = 0; i < paletteInfos.length; i++) {
+      const paletteInfo = paletteInfos[i];
       if (paletteInfo.endSeconds < paletteInfo.startSeconds) {
         this.paletteStatuses[i] = "bad";
         this.isBad = true;
       }
 
-      const nextPaletteInfo = this.paletteInfos[i + 1];
+      const nextPaletteInfo = paletteInfos[i + 1];
       if (
         nextPaletteInfo &&
         paletteInfo.endSeconds > nextPaletteInfo.startSeconds
@@ -289,16 +287,10 @@ export default class World {
 
   // ----------
   draw() {
-    const {
-      width,
-      height,
-      currentColors,
-      pixels,
-      ctx,
-      pixelData,
-      isBad,
-      firstDraw,
-    } = this;
+    const { currentColors, ctx, pixelData, isBad, firstDraw } = this;
+
+    const { width, height, pixels, overlays } = this.data;
+
     if (
       !ctx ||
       !width ||
@@ -323,7 +315,7 @@ export default class World {
       }
     }
 
-    for (const overlay of this.overlays) {
+    for (const overlay of overlays) {
       let x = 0;
       let y = 0;
       for (let i = 0; i < overlay.pixels.length; i++) {
@@ -358,14 +350,7 @@ export default class World {
         version: WORLD_DATA_VERSION,
         type: WORLD_DATA_TYPE,
       },
-      data: {
-        name: this.name,
-        width: this.width,
-        height: this.height,
-        paletteInfos: this.paletteInfos,
-        pixels: this.pixels,
-        overlays: this.overlays,
-      },
+      data: this.data,
     };
 
     return JSON.stringify(object);
@@ -416,16 +401,16 @@ export default class World {
   }
 
   // ----------
-  ingestData(parsedData: StorageData) {
-    this.name = parsedData.name;
-    this.width = parsedData.width;
-    this.height = parsedData.height;
-    this.paletteInfos = parsedData.paletteInfos;
-    this.overlays = parsedData.overlays || [];
+  ingestData(parsedData: WorldData) {
+    this.data.name = parsedData.name;
+    this.data.width = parsedData.width;
+    this.data.height = parsedData.height;
+    this.data.paletteInfos = parsedData.paletteInfos;
+    this.data.overlays = parsedData.overlays || [];
 
     // console.log(parsedData);
 
-    for (const paletteInfo of this.paletteInfos) {
+    for (const paletteInfo of this.data.paletteInfos) {
       if (paletteInfo.endSeconds === null) {
         paletteInfo.endSeconds = maxSeconds - 1;
       }
@@ -436,7 +421,7 @@ export default class World {
 
     this.sortPalettes();
 
-    this.pixels = parsedData.pixels;
+    this.data.pixels = parsedData.pixels;
     this.updateForImage();
 
     // console.log(this.paletteInfos);

@@ -2,7 +2,7 @@
 import "./Controls.less";
 import React, { useEffect, useState } from "react";
 import WorldRunner from "./WorldRunner";
-import { OverlayInfo, PaletteInfo } from "./types";
+import { OverlayInfo, PaletteInfo } from "./WorldData";
 import { getSecondsFromTimeString, importLbm, makeTimeString } from "./util";
 import { maxSeconds } from "./vars";
 
@@ -16,6 +16,7 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
   const [overlayAreaOpen, setOverlayAreaOpen] = useState<boolean>(false);
   const seconds = worldRunner.getSeconds();
   const world = worldRunner.world;
+  const worldData = world.data;
 
   useEffect(() => {
     worldRunner.onChange = () => {
@@ -101,10 +102,10 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
             setPaletteAreaOpen(!paletteAreaOpen);
           }}
         >
-          Palettes ({world.paletteInfos.length})
+          Palettes ({worldData.paletteInfos.length})
         </div>
         {paletteAreaOpen &&
-          world.paletteInfos.map(
+          worldData.paletteInfos.map(
             (paletteInfo: PaletteInfo, paletteIndex: number) => {
               return (
                 <div
@@ -193,10 +194,10 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
             setOverlayAreaOpen(!overlayAreaOpen);
           }}
         >
-          Overlays ({world.overlays.length})
+          Overlays ({worldData.overlays.length})
         </div>
         {overlayAreaOpen &&
-          world.overlays.map(
+          worldData.overlays.map(
             (overlayInfo: OverlayInfo, overlayIndex: number) => {
               return (
                 <div key={overlayInfo.id} className={`resource-info`}>
