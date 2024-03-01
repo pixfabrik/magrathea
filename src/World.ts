@@ -1,7 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import _ from "lodash";
 import { saveAs } from "file-saver";
 import { LbmCycle, LbmData, StorageContainer } from "./types";
-import { getEmptyWorldData, PaletteInfo, WorldData } from "./WorldData";
+import {
+  EventInfo,
+  getEmptyEventInfo,
+  getEmptyWorldData,
+  PaletteInfo,
+  WorldData,
+} from "./WorldData";
 import { getNextId, importFile, mapLinear } from "./util";
 import {
   maxSeconds,
@@ -182,6 +189,33 @@ export default class World {
   }
 
   // ----------
+  addEvent() {
+    const { events } = this.data;
+    const id = getNextId(events);
+    const eventInfo = getEmptyEventInfo();
+    eventInfo.id = id;
+    eventInfo.name = `Event ${id}`;
+    events.push(eventInfo);
+
+    this.handleChange();
+  }
+
+  // ----------
+  updateEvent(eventIndex: number, newInfo: Partial<EventInfo>) {
+    const { events } = this.data;
+    const eventInfo = events[eventIndex];
+    Object.assign(eventInfo, newInfo);
+    this.handleChange();
+  }
+
+  // ----------
+  deleteEvent(eventIndex: number) {
+    const { events } = this.data;
+    events.splice(eventIndex, 1);
+    this.handleChange();
+  }
+
+  // ----------
   handleChange() {
     this.save();
 
@@ -289,7 +323,7 @@ export default class World {
   draw() {
     const { currentColors, ctx, pixelData, isBad, firstDraw } = this;
 
-    const { width, height, pixels, overlays } = this.data;
+    const { width, height, pixels, overlays, events } = this.data;
 
     if (
       !ctx ||
@@ -315,9 +349,17 @@ export default class World {
       }
     }
 
-    for (const overlay of overlays) {
-      let x = 0;
-      let y = 0;
+    for (const event of events) {
+      const overlay = overlays.find(
+        (overlay) => overlay.id === event.overlayId
+      );
+
+      if (!overlay) {
+        continue;
+      }
+
+      let x = event.startPosition.x;
+      let y = event.startPosition.y;
       for (let i = 0; i < overlay.pixels.length; i++) {
         const pixel = overlay.pixels[i];
         const color = currentColors[pixel];
@@ -330,8 +372,8 @@ export default class World {
         }
 
         x++;
-        if (x >= overlay.width) {
-          x = 0;
+        if (x >= event.startPosition.x + overlay.width) {
+          x = event.startPosition.x;
           y++;
         }
       }
@@ -402,13 +444,8 @@ export default class World {
 
   // ----------
   ingestData(parsedData: WorldData) {
-    this.data.name = parsedData.name;
-    this.data.width = parsedData.width;
-    this.data.height = parsedData.height;
-    this.data.paletteInfos = parsedData.paletteInfos;
-    this.data.overlays = parsedData.overlays || [];
-
     // console.log(parsedData);
+    this.data = Object.assign(getEmptyWorldData(), parsedData);
 
     for (const paletteInfo of this.data.paletteInfos) {
       if (paletteInfo.endSeconds === null) {
@@ -419,9 +456,11 @@ export default class World {
       paletteInfo.endSeconds %= maxSeconds;
     }
 
-    this.sortPalettes();
+    for (const event of this.data.events) {
+      _.defaultsDeep(event, getEmptyEventInfo());
+    }
 
-    this.data.pixels = parsedData.pixels;
+    this.sortPalettes();
     this.updateForImage();
 
     // console.log(this.paletteInfos);

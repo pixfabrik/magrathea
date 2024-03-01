@@ -1,4 +1,4 @@
-import { LbmCycle } from "./types";
+import { LbmCycle, Point } from "./types";
 
 export type PaletteInfo = {
   id: number;
@@ -17,6 +17,14 @@ export type OverlayInfo = {
   pixels: number[];
 };
 
+export type EventInfo = {
+  id: number;
+  name: string;
+  overlayId: number;
+  startPosition: Point;
+  endPosition: Point;
+};
+
 export type WorldData = {
   name: string;
   width: number;
@@ -24,7 +32,19 @@ export type WorldData = {
   paletteInfos: PaletteInfo[];
   pixels: number[];
   overlays: OverlayInfo[];
+  events: EventInfo[];
 };
+
+// ----------
+export function getEmptyEventInfo(): EventInfo {
+  return {
+    id: 0,
+    name: "",
+    overlayId: -1,
+    startPosition: { x: 0, y: 0 },
+    endPosition: { x: 0, y: 0 },
+  };
+}
 
 // ----------
 export function getEmptyWorldData(): WorldData {
@@ -35,5 +55,6 @@ export function getEmptyWorldData(): WorldData {
     paletteInfos: [],
     pixels: [],
     overlays: [],
+    events: [],
   };
 }

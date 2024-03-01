@@ -2,7 +2,7 @@
 import "./Controls.less";
 import React, { useEffect, useState } from "react";
 import WorldRunner from "./WorldRunner";
-import { OverlayInfo, PaletteInfo } from "./WorldData";
+import { EventInfo, OverlayInfo, PaletteInfo } from "./WorldData";
 import { getSecondsFromTimeString, importLbm, makeTimeString } from "./util";
 import { maxSeconds } from "./vars";
 
@@ -14,6 +14,7 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
   const [changeCount, setChangeCount] = useState<number>(0);
   const [paletteAreaOpen, setPaletteAreaOpen] = useState<boolean>(false);
   const [overlayAreaOpen, setOverlayAreaOpen] = useState<boolean>(false);
+  const [eventAreaOpen, setEventAreaOpen] = useState<boolean>(false);
   const seconds = worldRunner.getSeconds();
   const world = worldRunner.world;
   const worldData = world.data;
@@ -85,7 +86,7 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
         </button>
         <div>{makeTimeString(seconds)}</div>
         <input
-          className="time-slider"
+          className="slider"
           type="range"
           min="0"
           max={maxSeconds - 1}
@@ -213,6 +214,96 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
               );
             }
           )}
+      </div>
+      <div className="resource-area">
+        <div
+          className="area-title"
+          onClick={() => {
+            setEventAreaOpen(!eventAreaOpen);
+          }}
+        >
+          Events ({worldData.events.length})
+          <button
+            onClick={(event) => {
+              event.stopPropagation();
+              setEventAreaOpen(true);
+              world.addEvent();
+            }}
+          >
+            Add
+          </button>
+        </div>
+        {eventAreaOpen &&
+          worldData.events.map((eventInfo: EventInfo, eventIndex: number) => {
+            return (
+              <div key={eventInfo.id} className={`resource-info`}>
+                <div className="name">{eventInfo.name}</div>
+                Overlay:{" "}
+                <select
+                  value={eventInfo.overlayId}
+                  onChange={(event) => {
+                    world.updateEvent(eventIndex, {
+                      overlayId: parseInt(event.currentTarget.value),
+                    });
+                  }}
+                >
+                  <option key={-1} value={-1}>
+                    None
+                  </option>
+                  {worldData.overlays.map((overlayInfo: OverlayInfo) => {
+                    return (
+                      <option key={overlayInfo.id} value={overlayInfo.id}>
+                        {overlayInfo.name}
+                      </option>
+                    );
+                  })}
+                </select>
+                <div>
+                  Start X:{" "}
+                  <input
+                    className="slider"
+                    type="range"
+                    min="0"
+                    max={worldData.width}
+                    value={eventInfo.startPosition.x}
+                    onChange={(event) => {
+                      world.updateEvent(eventIndex, {
+                        startPosition: {
+                          x: parseInt(event.currentTarget.value),
+                          y: eventInfo.startPosition.y,
+                        },
+                      });
+                    }}
+                  />
+                </div>
+                <div>
+                  Start Y:{" "}
+                  <input
+                    className="slider"
+                    type="range"
+                    min="0"
+                    max={worldData.width}
+                    value={eventInfo.startPosition.y}
+                    onChange={(event) => {
+                      world.updateEvent(eventIndex, {
+                        startPosition: {
+                          x: eventInfo.startPosition.x,
+                          y: parseInt(event.currentTarget.value),
+                        },
+                      });
+                    }}
+                  />
+                </div>
+                <button
+                  onClick={() => {
+                    world.deleteEvent(eventIndex);
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
+            );
+          })}
       </div>
       {/* )}
       </AppContext.Consumer> */}

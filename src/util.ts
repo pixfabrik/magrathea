@@ -170,8 +170,11 @@ export async function importLbm(types: string[]): Promise<LbmData> {
   // console.log(data);
 
   if (data.type !== "dpaint") {
-    const worldData = data as Partial<StorageContainer>;
-    if (worldData.format && worldData.format.type === WORLD_DATA_TYPE) {
+    const worldDataContainer = data as Partial<StorageContainer>;
+    if (
+      worldDataContainer.format &&
+      worldDataContainer.format.type === WORLD_DATA_TYPE
+    ) {
       throw new Error("This is a world file, not pixels.");
     } else {
       throw new Error("This is not a DPaintJS file.");

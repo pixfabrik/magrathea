@@ -1,5 +1,7 @@
 import { WorldData } from "./WorldData";
 
+export type Point = { x: number; y: number };
+
 export type ObjectWithId = {
   id: number;
 };

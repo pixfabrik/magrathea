@@ -1,5 +1,9 @@
 # Magrathea Change Log
 
+5:
+
+- We now have an "events" control section.
+
 4:
 
 - Now honoring the "active" flag on cycles imported from DPaintJS.
