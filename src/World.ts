@@ -30,7 +30,7 @@ export default class World {
   paletteStatuses: ("good" | "bad")[] = [];
   isBad: boolean = false;
   firstDraw: boolean = true;
-  scheduler = new Scheduler();
+  scheduler = new Scheduler(this);
   onChange: (() => void) | null = null;
 
   // ----------
@@ -189,6 +189,11 @@ export default class World {
     const { overlays } = this.data;
     overlays.splice(overlayIndex, 1);
     this.handleChange();
+  }
+
+  // ----------
+  getEventInfo(id: number) {
+    return this.data.events.find((eventInfo) => eventInfo.id === id);
   }
 
   // ----------

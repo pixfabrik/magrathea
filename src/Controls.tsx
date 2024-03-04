@@ -269,6 +269,26 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                   })}
                 </select>
                 <div>
+                  Duration: {eventInfo.durationSeconds}{" "}
+                  <input
+                    className="slider"
+                    type="range"
+                    min="0"
+                    max="600"
+                    value={eventInfo.durationSeconds}
+                    onChange={(event) => {
+                      world.updateEvent(eventIndex, {
+                        durationSeconds: parseInt(event.currentTarget.value),
+                      });
+
+                      world.scheduler.make({
+                        eventInfoId: eventInfo.id,
+                        progress: 0,
+                      });
+                    }}
+                  />
+                </div>
+                <div>
                   Start X:{" "}
                   <input
                     className="slider"

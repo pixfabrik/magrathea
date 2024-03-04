@@ -20,6 +20,7 @@ export type OverlayInfo = {
 export type EventInfo = {
   id: number;
   name: string;
+  durationSeconds: number;
   overlayId: number;
   startPosition: Point;
   endPosition: Point;
@@ -40,6 +41,7 @@ export function getEmptyEventInfo(): EventInfo {
   return {
     id: 0,
     name: "",
+    durationSeconds: 5,
     overlayId: -1,
     startPosition: { x: 0, y: 0 },
     endPosition: { x: 0, y: 0 },

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import _ from "lodash";
+import World from "./World";
 
 export type SchedulerMakeArgs = {
   eventInfoId: number;
@@ -14,33 +15,42 @@ export type ScheduleEvent = {
 
 // ----------
 export default class Scheduler {
-  events: SchedulerMakeArgs[] = [];
+  world: World;
+  eventArgsArray: SchedulerMakeArgs[] = [];
 
   // ----------
-  constructor() {}
+  constructor(world: World) {
+    this.world = world;
+  }
 
   // ----------
   make(args: SchedulerMakeArgs) {
-    this.events = [args];
+    this.eventArgsArray = [args];
   }
 
   // ----------
   getEvents(nowSeconds: number) {
-    let scheduleEvents = this.events.map((event) => {
-      if (event.progress !== undefined) {
+    let scheduleEvents = this.eventArgsArray.map((eventArgs) => {
+      if (eventArgs.progress !== undefined) {
         return {
-          eventInfoId: event.eventInfoId,
-          progress: event.progress,
+          eventInfoId: eventArgs.eventInfoId,
+          progress: eventArgs.progress,
         };
       }
 
-      if (event.startSeconds !== undefined) {
-        const endSeconds = event.startSeconds + 5;
+      const eventInfo = this.world.getEventInfo(eventArgs.eventInfoId);
+      if (!eventInfo) {
+        return null;
+      }
+
+      if (eventArgs.startSeconds !== undefined) {
+        const endSeconds = eventArgs.startSeconds + eventInfo.durationSeconds;
         const progress =
-          (nowSeconds - event.startSeconds) / (endSeconds - event.startSeconds);
+          (nowSeconds - eventArgs.startSeconds) /
+          (endSeconds - eventArgs.startSeconds);
         if (progress >= 0 && progress <= 1) {
           return {
-            eventInfoId: event.eventInfoId,
+            eventInfoId: eventArgs.eventInfoId,
             progress: progress,
           };
         }

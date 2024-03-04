@@ -10,10 +10,13 @@ Requires Node. First time, do an `npm install`. After that, to run:
 
 ### Next
 
-- Layers
-
 ### Backlog
 
+- Remember which panels are expanded or collapsed
+- Better UI for event duration
+- Be able to have events start off the top and left sides (currently the X and Y can only go down to 0)
+- Viewer mode
+- Min/max for event duration
 - Cycle blending
 - Optimize cycling so we only touch the pixels that need to change
 - What to do during transition if there are different cycles between palettes?
