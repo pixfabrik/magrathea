@@ -6,16 +6,18 @@ import {
   EventInfo,
   getEmptyEventInfo,
   getEmptyWorldData,
+  isValidWorldData,
   PaletteInfo,
   WorldData,
 } from "./WorldData";
-import { getNextId, importFile, mapLinear } from "./util";
+import { getNextId, importFile, lerp, mapLinear } from "./util";
 import {
   maxSeconds,
   LBM_CYCLE_RATE_DIVISOR,
   WORLD_DATA_VERSION,
   WORLD_DATA_TYPE,
 } from "./vars";
+import Scheduler from "./Scheduler";
 
 const worldStorageKey = "world";
 
@@ -28,6 +30,7 @@ export default class World {
   paletteStatuses: ("good" | "bad")[] = [];
   isBad: boolean = false;
   firstDraw: boolean = true;
+  scheduler = new Scheduler();
   onChange: (() => void) | null = null;
 
   // ----------
@@ -122,7 +125,7 @@ export default class World {
       this.currentColors = colors;
     }
 
-    this.draw();
+    this.draw(nowSeconds);
   }
 
   // ----------
@@ -198,6 +201,7 @@ export default class World {
     events.push(eventInfo);
 
     this.handleChange();
+    return eventInfo;
   }
 
   // ----------
@@ -320,8 +324,8 @@ export default class World {
   }
 
   // ----------
-  draw() {
-    const { currentColors, ctx, pixelData, isBad, firstDraw } = this;
+  draw(nowSeconds: number) {
+    const { currentColors, ctx, pixelData, isBad, firstDraw, scheduler } = this;
 
     const { width, height, pixels, overlays, events } = this.data;
 
@@ -349,21 +353,51 @@ export default class World {
       }
     }
 
-    for (const event of events) {
+    const scheduleEvents = scheduler.getEvents(nowSeconds);
+
+    for (const scheduleEvent of scheduleEvents) {
+      if (!scheduleEvent) {
+        continue;
+      }
+
+      const eventInfo = events.find(
+        (eventInfo) => eventInfo.id === scheduleEvent.eventInfoId
+      );
+
+      if (!eventInfo) {
+        continue;
+      }
+
       const overlay = overlays.find(
-        (overlay) => overlay.id === event.overlayId
+        (overlay) => overlay.id === eventInfo.overlayId
       );
 
       if (!overlay) {
         continue;
       }
 
-      let x = event.startPosition.x;
-      let y = event.startPosition.y;
+      const baseX = Math.round(
+        lerp(
+          eventInfo.startPosition.x,
+          eventInfo.endPosition.x,
+          scheduleEvent.progress
+        )
+      );
+
+      const baseY = Math.round(
+        lerp(
+          eventInfo.startPosition.y,
+          eventInfo.endPosition.y,
+          scheduleEvent.progress
+        )
+      );
+
+      let x = baseX;
+      let y = baseY;
       for (let i = 0; i < overlay.pixels.length; i++) {
         const pixel = overlay.pixels[i];
         const color = currentColors[pixel];
-        if (pixel && color && x < width && y < height) {
+        if (pixel && color && x >= 0 && y >= 0 && x < width && y < height) {
           const p = (x + y * width) * 4;
           pixelData[p] = color[0]; // Red channel
           pixelData[p + 1] = color[1]; // Green channel
@@ -372,8 +406,8 @@ export default class World {
         }
 
         x++;
-        if (x >= event.startPosition.x + overlay.width) {
-          x = event.startPosition.x;
+        if (x >= baseX + overlay.width) {
+          x = baseX;
           y++;
         }
       }
@@ -445,9 +479,14 @@ export default class World {
   // ----------
   ingestData(parsedData: WorldData) {
     // console.log(parsedData);
-    this.data = Object.assign(getEmptyWorldData(), parsedData);
 
-    for (const paletteInfo of this.data.paletteInfos) {
+    const newData = _.defaultsDeep(parsedData, getEmptyWorldData());
+
+    for (const event of newData.events) {
+      _.defaultsDeep(event, getEmptyEventInfo());
+    }
+
+    for (const paletteInfo of newData.paletteInfos) {
       if (paletteInfo.endSeconds === null) {
         paletteInfo.endSeconds = maxSeconds - 1;
       }
@@ -456,9 +495,11 @@ export default class World {
       paletteInfo.endSeconds %= maxSeconds;
     }
 
-    for (const event of this.data.events) {
-      _.defaultsDeep(event, getEmptyEventInfo());
+    if (!isValidWorldData(newData)) {
+      // return;
     }
+
+    this.data = newData;
 
     this.sortPalettes();
     this.updateForImage();

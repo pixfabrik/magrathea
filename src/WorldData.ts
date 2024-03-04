@@ -58,3 +58,24 @@ export function getEmptyWorldData(): WorldData {
     events: [],
   };
 }
+
+// ----------
+export function isValidWorldData(worldData: WorldData): boolean {
+  if (
+    worldData.width <= 0 ||
+    worldData.height <= 0 ||
+    worldData.pixels.length !== worldData.width * worldData.height
+  ) {
+    console.error("Invalid world data:", worldData);
+    return false;
+  }
+
+  for (const eventInfo of worldData.events) {
+    if (eventInfo.id <= 0) {
+      console.error("Invalid eventInfo:", eventInfo);
+      return false;
+    }
+  }
+
+  return true;
+}

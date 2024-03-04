@@ -227,7 +227,12 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
             onClick={(event) => {
               event.stopPropagation();
               setEventAreaOpen(true);
-              world.addEvent();
+              const eventInfo = world.addEvent();
+
+              world.scheduler.make({
+                eventInfoId: eventInfo.id,
+                progress: 0,
+              });
             }}
           >
             Add
@@ -244,6 +249,11 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                   onChange={(event) => {
                     world.updateEvent(eventIndex, {
                       overlayId: parseInt(event.currentTarget.value),
+                    });
+
+                    world.scheduler.make({
+                      eventInfoId: eventInfo.id,
+                      progress: 0,
                     });
                   }}
                 >
@@ -273,6 +283,11 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                           y: eventInfo.startPosition.y,
                         },
                       });
+
+                      world.scheduler.make({
+                        eventInfoId: eventInfo.id,
+                        progress: 0,
+                      });
                     }}
                   />
                 </div>
@@ -291,9 +306,70 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                           y: parseInt(event.currentTarget.value),
                         },
                       });
+
+                      world.scheduler.make({
+                        eventInfoId: eventInfo.id,
+                        progress: 0,
+                      });
                     }}
                   />
                 </div>
+                <div>
+                  End X:{" "}
+                  <input
+                    className="slider"
+                    type="range"
+                    min="0"
+                    max={worldData.width}
+                    value={eventInfo.endPosition.x}
+                    onChange={(event) => {
+                      world.updateEvent(eventIndex, {
+                        endPosition: {
+                          x: parseInt(event.currentTarget.value),
+                          y: eventInfo.endPosition.y,
+                        },
+                      });
+
+                      world.scheduler.make({
+                        eventInfoId: eventInfo.id,
+                        progress: 1,
+                      });
+                    }}
+                  />
+                </div>
+                <div>
+                  End Y:{" "}
+                  <input
+                    className="slider"
+                    type="range"
+                    min="0"
+                    max={worldData.width}
+                    value={eventInfo.endPosition.y}
+                    onChange={(event) => {
+                      world.updateEvent(eventIndex, {
+                        endPosition: {
+                          x: eventInfo.endPosition.x,
+                          y: parseInt(event.currentTarget.value),
+                        },
+                      });
+
+                      world.scheduler.make({
+                        eventInfoId: eventInfo.id,
+                        progress: 1,
+                      });
+                    }}
+                  />
+                </div>
+                <button
+                  onClick={() => {
+                    world.scheduler.make({
+                      eventInfoId: eventInfo.id,
+                      startSeconds: seconds,
+                    });
+                  }}
+                >
+                  Trigger
+                </button>
                 <button
                   onClick={() => {
                     world.deleteEvent(eventIndex);
