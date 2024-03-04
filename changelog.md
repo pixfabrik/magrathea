@@ -2,7 +2,9 @@
 
 5:
 
-- We now have an "events" control section.
+- We now have an "events" control section. An event (at this point) is an overlay that appears for a duration at a location and can move across the screen.
+- There's now a switcher between "view" mode and "edit" mode. View mode acts like the viewer app, scheduling a whole day worth of events. You can use the time slider to move through them, or hit the "Next Event" button to skip to the next one.
+- Various UI updates.
 
 4:
 

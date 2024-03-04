@@ -26,6 +26,14 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
     };
   }, [changeCount, worldRunner]);
 
+  useEffect(() => {
+    if (mode === "view") {
+      world.scheduler.makeDay();
+    } else {
+      world.scheduler.clear();
+    }
+  }, [mode]);
+
   setTimeout(() => {
     setChangeCount(changeCount + 1);
   }, 1000);
@@ -78,6 +86,24 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
             worldRunner.setSeconds(parseFloat(event.currentTarget.value));
           }}
         />
+        {mode === "view" && (
+          <div>
+            <button
+              onClick={() => {
+                const startSeconds =
+                  world.scheduler.getNextEventStartSeconds(seconds);
+
+                if (startSeconds === -1) {
+                  worldRunner.setSeconds(maxSeconds - 1);
+                } else {
+                  worldRunner.setSeconds(startSeconds);
+                }
+              }}
+            >
+              Next Event
+            </button>
+          </div>
+        )}
         {mode === "edit" && (
           <>
             <button
@@ -310,7 +336,7 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                         <input
                           className="slider"
                           type="range"
-                          min="0"
+                          min="1"
                           max="600"
                           value={eventInfo.durationSeconds}
                           onChange={(event) => {

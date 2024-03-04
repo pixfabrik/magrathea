@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import _ from "lodash";
 import World from "./World";
+import { maxSeconds } from "./vars";
 
 export type SchedulerMakeArgs = {
   eventInfoId: number;
   progress?: number;
   startSeconds?: number;
+  durationSeconds?: number;
 };
 
 export type ScheduleEvent = {
@@ -24,8 +26,60 @@ export default class Scheduler {
   }
 
   // ----------
+  clear() {
+    this.eventArgsArray = [];
+  }
+
+  // ----------
   make(args: SchedulerMakeArgs) {
+    if (args.startSeconds !== undefined && args.durationSeconds === undefined) {
+      const eventInfo = this.world.getEventInfo(args.eventInfoId);
+      if (eventInfo) {
+        args.durationSeconds = eventInfo.durationSeconds;
+      }
+    }
+
     this.eventArgsArray = [args];
+  }
+
+  // ----------
+  makeDay() {
+    this.clear();
+
+    this.world.data.events.forEach((eventInfo) => {
+      for (let seconds = 0; seconds < maxSeconds; ) {
+        const startSeconds = seconds + Math.random() * 60 * 60;
+        const durationSeconds = eventInfo.durationSeconds;
+        if (startSeconds + durationSeconds > maxSeconds) {
+          break;
+        }
+
+        this.eventArgsArray.push({
+          eventInfoId: eventInfo.id,
+          startSeconds,
+          durationSeconds,
+        });
+
+        seconds = startSeconds + durationSeconds;
+      }
+    });
+
+    this.eventArgsArray = _.sortBy(this.eventArgsArray, (eventArgs) => {
+      return eventArgs.startSeconds;
+    });
+  }
+
+  // ----------
+  getNextEventStartSeconds(nowSeconds: number) {
+    for (const eventArgs of this.eventArgsArray) {
+      if (eventArgs.startSeconds !== undefined) {
+        if (eventArgs.startSeconds > nowSeconds) {
+          return eventArgs.startSeconds;
+        }
+      }
+    }
+
+    return -1;
   }
 
   // ----------
@@ -38,13 +92,11 @@ export default class Scheduler {
         };
       }
 
-      const eventInfo = this.world.getEventInfo(eventArgs.eventInfoId);
-      if (!eventInfo) {
-        return null;
-      }
-
-      if (eventArgs.startSeconds !== undefined) {
-        const endSeconds = eventArgs.startSeconds + eventInfo.durationSeconds;
+      if (
+        eventArgs.startSeconds !== undefined &&
+        eventArgs.durationSeconds !== undefined
+      ) {
+        const endSeconds = eventArgs.startSeconds + eventArgs.durationSeconds;
         const progress =
           (nowSeconds - eventArgs.startSeconds) /
           (endSeconds - eventArgs.startSeconds);
