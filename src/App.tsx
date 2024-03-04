@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import WorldRunner from "./WorldRunner";
 import Controls from "./Controls";
 
-const VERSION = 4;
+const VERSION = 5;
 
 const worldRunner = new WorldRunner();
 
@@ -29,7 +29,7 @@ function App() {
       {/* <AppContext.Provider value={{ world, setWorld }}> */}
       <div className="top-nav">
         Living Worlds Maker
-        {worldRunner.world.name ? " - " + worldRunner.world.name : ""}
+        {worldRunner.world.data.name ? " - " + worldRunner.world.data.name : ""}
         <a
           className="version"
           href="https://github.com/pixfabrik/magrathea/blob/main/changelog.md"
