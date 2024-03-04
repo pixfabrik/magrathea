@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import _ from "lodash";
+import seedrandom from "seedrandom";
 import World from "./World";
 import { maxSeconds } from "./vars";
+import { getDateString } from "./util";
 
 export type SchedulerMakeArgs = {
   eventInfoId: number;
@@ -46,9 +48,11 @@ export default class Scheduler {
   makeDay() {
     this.clear();
 
+    const random = seedrandom(getDateString());
+
     this.world.data.events.forEach((eventInfo) => {
       for (let seconds = 0; seconds < maxSeconds; ) {
-        const startSeconds = seconds + Math.random() * 60 * 60;
+        const startSeconds = seconds + random() * 60 * 60;
         const durationSeconds = eventInfo.durationSeconds;
         if (startSeconds + durationSeconds > maxSeconds) {
           break;

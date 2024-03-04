@@ -10,7 +10,7 @@ import {
   PaletteInfo,
   WorldData,
 } from "./WorldData";
-import { getNextId, importFile, lerp, mapLinear } from "./util";
+import { getDateString, getNextId, importFile, lerp, mapLinear } from "./util";
 import {
   maxSeconds,
   LBM_CYCLE_RATE_DIVISOR,
@@ -448,8 +448,7 @@ export default class World {
       type: "application/json;charset=utf-8",
     });
 
-    const isoDate = new Date().toISOString().split("T")[0];
-    saveAs(blob, `Magrathea World ${isoDate}.json`);
+    saveAs(blob, `Magrathea World ${getDateString()}.json`);
   }
 
   // ----------

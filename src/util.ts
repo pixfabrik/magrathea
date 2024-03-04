@@ -106,6 +106,12 @@ export function getSecondsFromTimeString(timeString: string) {
 }
 
 // ----------
+export function getDateString() {
+  const isoDate = new Date().toISOString().split("T")[0];
+  return isoDate;
+}
+
+// ----------
 export function getNextId(items: ObjectWithId[]) {
   let id = 1;
   for (const item of items) {
