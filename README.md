@@ -13,6 +13,7 @@ Requires Node. First time, do an `npm install`. After that, to run:
 ### Backlog
 
 - Remember which panels are expanded or collapsed
+- Color cycling should be based on real time rather than the time slider (so it still cycles smoothly when fast forwarding)
 - Better UI for event duration
 - Be able to have events start off the top and left sides (currently the X and Y can only go down to 0)
 - Viewer mode
