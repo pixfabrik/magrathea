@@ -10,8 +10,6 @@ Requires Node. First time, do an `npm install`. After that, to run:
 
 ### Next
 
-- Be able to see the mode palette infos in a mode in the controls
-- Move palette timing logic from the original palette infos to the mode palette infos
 - Add modes to the scheduler and be able to transition between them
 
 ### Events

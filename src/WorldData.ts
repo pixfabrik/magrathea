@@ -5,8 +5,15 @@ export type PaletteInfo = {
   name: string;
   colors: number[][];
   cycles: LbmCycle[];
-  startSeconds: number;
-  endSeconds: number;
+};
+
+export type PaletteInfoV1 = {
+  id: number;
+  name: string;
+  colors: number[][];
+  cycles: LbmCycle[];
+  startSeconds?: number;
+  endSeconds?: number;
 };
 
 export type OverlayInfo = {

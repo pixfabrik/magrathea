@@ -11,6 +11,7 @@ import {
   ModeInfo,
   ModePaletteInfo,
   PaletteInfo,
+  PaletteInfoV1,
   WorldData,
 } from "./WorldData";
 import { getDateString, getNextId, importFile, lerp, mapLinear } from "./util";
@@ -46,8 +47,16 @@ export default class World {
         const parsedStorage = JSON.parse(storage);
         if (typeof parsedStorage === "object") {
           // console.log("storage", typeof parsedStorage, parsedStorage);
-          const parsedData = parsedStorage.data || parsedStorage;
-          this.ingestData(parsedData);
+          let parsedData, version;
+          if (parsedStorage.format) {
+            parsedData = parsedStorage.data;
+            version = parsedStorage.format.version;
+          } else {
+            parsedData = parsedStorage;
+            version = 0;
+          }
+
+          this.ingestData(parsedData, version);
         }
       } catch (err) {
         console.error("Error parsing world data:", err);
@@ -63,69 +72,90 @@ export default class World {
   // ----------
   frame(nowSeconds: number) {
     const { paletteInfos } = this.data;
+
     // Find current palette infos
-    let startPaletteInfo: PaletteInfo | null = null,
-      endPaletteInfo: PaletteInfo | null = null;
+    const modeInfo = this.scheduler.getCurrentModeInfo(nowSeconds);
+    if (modeInfo) {
+      let startModePaletteInfo: ModePaletteInfo | null = null,
+        endModePaletteInfo: ModePaletteInfo | null = null;
 
-    for (const paletteInfo of paletteInfos) {
-      if (nowSeconds >= paletteInfo.startSeconds) {
-        startPaletteInfo = paletteInfo;
+      for (const modePaletteInfo of modeInfo.modePaletteInfos) {
+        if (nowSeconds >= modePaletteInfo.startSeconds) {
+          startModePaletteInfo = modePaletteInfo;
 
-        if (nowSeconds < paletteInfo.endSeconds) {
-          endPaletteInfo = null;
+          if (nowSeconds < modePaletteInfo.endSeconds) {
+            endModePaletteInfo = null;
+            break;
+          }
+        } else if (startModePaletteInfo) {
+          endModePaletteInfo = modePaletteInfo;
           break;
         }
-      } else if (startPaletteInfo) {
-        endPaletteInfo = paletteInfo;
-        break;
-      }
-    }
-
-    if (startPaletteInfo) {
-      let colors: number[][];
-      let cycles: LbmCycle[];
-      if (endPaletteInfo) {
-        const progress = mapLinear(
-          nowSeconds,
-          startPaletteInfo.endSeconds,
-          endPaletteInfo.startSeconds,
-          0,
-          1,
-          true
-        );
-
-        colors = startPaletteInfo.colors.map((startColor, i) => {
-          const endColor = endPaletteInfo!.colors[i];
-          return [
-            startColor[0] + (endColor[0] - startColor[0]) * progress,
-            startColor[1] + (endColor[1] - startColor[1]) * progress,
-            startColor[2] + (endColor[2] - startColor[2]) * progress,
-          ];
-        });
-
-        cycles = startPaletteInfo.cycles;
-      } else {
-        colors = startPaletteInfo.colors.slice();
-        cycles = startPaletteInfo.cycles;
       }
 
-      for (let i = 0; i < cycles.length; i++) {
-        const cycle = cycles[i];
-        let low = cycle.low;
-        let high = cycle.high;
-        const cycleSize = high - low + 1;
-        const cycleRate = cycle.rate / LBM_CYCLE_RATE_DIVISOR;
-        const cycleAmount = (cycleRate * nowSeconds) % cycleSize;
-        if (cycle.reverse === 2) {
-          [low, high] = [high, low];
+      let startPaletteInfo: PaletteInfo | null = null,
+        endPaletteInfo: PaletteInfo | null = null;
+
+      if (startModePaletteInfo) {
+        startPaletteInfo =
+          paletteInfos.find(
+            (paletteInfo) => paletteInfo.id === startModePaletteInfo!.paletteId
+          ) || null;
+      }
+
+      if (endModePaletteInfo) {
+        endPaletteInfo =
+          paletteInfos.find(
+            (paletteInfo) => paletteInfo.id === endModePaletteInfo!.paletteId
+          ) || null;
+      }
+
+      if (startModePaletteInfo && startPaletteInfo) {
+        let colors: number[][];
+        let cycles: LbmCycle[];
+        if (endModePaletteInfo && endPaletteInfo) {
+          const progress = mapLinear(
+            nowSeconds,
+            startModePaletteInfo.endSeconds,
+            endModePaletteInfo.startSeconds,
+            0,
+            1,
+            true
+          );
+
+          colors = startPaletteInfo.colors.map((startColor, i) => {
+            const endColor = endPaletteInfo!.colors[i];
+            return [
+              startColor[0] + (endColor[0] - startColor[0]) * progress,
+              startColor[1] + (endColor[1] - startColor[1]) * progress,
+              startColor[2] + (endColor[2] - startColor[2]) * progress,
+            ];
+          });
+
+          cycles = startPaletteInfo.cycles;
+        } else {
+          colors = startPaletteInfo.colors.slice();
+          cycles = startPaletteInfo.cycles;
         }
 
-        for (let j = 0; j < cycleAmount; j++) {
-          colors.splice(low, 0, colors.splice(high, 1)[0]);
-        }
-      }
+        for (let i = 0; i < cycles.length; i++) {
+          const cycle = cycles[i];
+          let low = cycle.low;
+          let high = cycle.high;
+          const cycleSize = high - low + 1;
+          const cycleRate = cycle.rate / LBM_CYCLE_RATE_DIVISOR;
+          const cycleAmount = (cycleRate * nowSeconds) % cycleSize;
+          if (cycle.reverse === 2) {
+            [low, high] = [high, low];
+          }
 
-      this.currentColors = colors;
+          for (let j = 0; j < cycleAmount; j++) {
+            colors.splice(low, 0, colors.splice(high, 1)[0]);
+          }
+        }
+
+        this.currentColors = colors;
+      }
     }
 
     this.draw(nowSeconds);
@@ -312,20 +342,12 @@ export default class World {
   // ----------
   loadColors(data: LbmData) {
     const { paletteInfos } = this.data;
-    let seconds = 0;
-    if (paletteInfos.length) {
-      const startPaletteInfo = paletteInfos[paletteInfos.length - 1];
-      startPaletteInfo.endSeconds = startPaletteInfo.startSeconds + 60;
-      seconds = startPaletteInfo.endSeconds + 5;
-    }
 
     const endPaletteInfo = {
       id: getNextId(paletteInfos),
       name: data.name,
       colors: data.colors,
       cycles: data.cycles.filter((cycle) => cycle.low !== cycle.high),
-      startSeconds: seconds,
-      endSeconds: maxSeconds - 1,
     };
 
     for (const cycle of endPaletteInfo.cycles) {
@@ -357,33 +379,29 @@ export default class World {
 
   // ----------
   sortPalettes() {
-    const { paletteInfos } = this.data;
-    paletteInfos.sort((a, b) => a.startSeconds - b.startSeconds);
-
-    this.isBad = false;
-    this.paletteStatuses.length = 0;
-
-    for (let i = 0; i < paletteInfos.length; i++) {
-      this.paletteStatuses[i] = "good";
-    }
-
-    for (let i = 0; i < paletteInfos.length; i++) {
-      const paletteInfo = paletteInfos[i];
-      if (paletteInfo.endSeconds < paletteInfo.startSeconds) {
-        this.paletteStatuses[i] = "bad";
-        this.isBad = true;
-      }
-
-      const nextPaletteInfo = paletteInfos[i + 1];
-      if (
-        nextPaletteInfo &&
-        paletteInfo.endSeconds > nextPaletteInfo.startSeconds
-      ) {
-        this.paletteStatuses[i] = "bad";
-        this.paletteStatuses[i + 1] = "bad";
-        this.isBad = true;
-      }
-    }
+    // const { paletteInfos } = this.data;
+    // paletteInfos.sort((a, b) => a.startSeconds - b.startSeconds);
+    // this.isBad = false;
+    // this.paletteStatuses.length = 0;
+    // for (let i = 0; i < paletteInfos.length; i++) {
+    //   this.paletteStatuses[i] = "good";
+    // }
+    // for (let i = 0; i < paletteInfos.length; i++) {
+    //   const paletteInfo = paletteInfos[i];
+    //   if (paletteInfo.endSeconds < paletteInfo.startSeconds) {
+    //     this.paletteStatuses[i] = "bad";
+    //     this.isBad = true;
+    //   }
+    //   const nextPaletteInfo = paletteInfos[i + 1];
+    //   if (
+    //     nextPaletteInfo &&
+    //     paletteInfo.endSeconds > nextPaletteInfo.startSeconds
+    //   ) {
+    //     this.paletteStatuses[i] = "bad";
+    //     this.paletteStatuses[i + 1] = "bad";
+    //     this.isBad = true;
+    //   }
+    // }
   }
 
   // ----------
@@ -531,7 +549,7 @@ export default class World {
         throw new Error("Damaged file.");
       }
 
-      this.ingestData(fileData.data);
+      this.ingestData(fileData.data, fileData.format.version);
       this.handleChange();
     } catch (err) {
       alert("Error importing: " + err);
@@ -539,22 +557,47 @@ export default class World {
   }
 
   // ----------
-  ingestData(parsedData: WorldData) {
+  ingestData(parsedData: WorldData, version: number) {
     // console.log(parsedData);
+
+    if (version < 2) {
+      const modeInfo = getEmptyModeInfo();
+      modeInfo.id = 1;
+      modeInfo.name = "Mode 1";
+      parsedData.modes = [modeInfo];
+
+      for (let i = 0; i < parsedData.paletteInfos.length; i++) {
+        const paletteInfo = parsedData.paletteInfos[i] as PaletteInfoV1;
+
+        if (
+          paletteInfo.startSeconds !== undefined &&
+          paletteInfo.endSeconds !== undefined
+        ) {
+          if (paletteInfo.endSeconds === null) {
+            paletteInfo.endSeconds = maxSeconds - 1;
+          }
+
+          paletteInfo.startSeconds %= maxSeconds;
+          paletteInfo.endSeconds %= maxSeconds;
+
+          const modePaletteInfo = {
+            paletteId: paletteInfo.id,
+            startSeconds: paletteInfo.startSeconds,
+            endSeconds: paletteInfo.endSeconds,
+          };
+
+          modeInfo.modePaletteInfos.push(modePaletteInfo);
+        }
+
+        delete paletteInfo.startSeconds;
+        delete paletteInfo.endSeconds;
+      }
+    }
 
     const newData = _.defaultsDeep(parsedData, getEmptyWorldData());
 
     for (const event of newData.events) {
       _.defaultsDeep(event, getEmptyEventInfo());
-    }
-
-    for (const paletteInfo of newData.paletteInfos) {
-      if (paletteInfo.endSeconds === null) {
-        paletteInfo.endSeconds = maxSeconds - 1;
-      }
-
-      paletteInfo.startSeconds %= maxSeconds;
-      paletteInfo.endSeconds %= maxSeconds;
     }
 
     if (!isValidWorldData(newData)) {

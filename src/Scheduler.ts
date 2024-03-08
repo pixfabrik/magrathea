@@ -120,4 +120,9 @@ export default class Scheduler {
 
     return scheduleEvents;
   }
+
+  // ----------
+  getCurrentModeInfo(nowSeconds: number) {
+    return this.world.data.modes[0];
+  }
 }

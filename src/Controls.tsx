@@ -166,40 +166,6 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                         }`}
                       >
                         <div className="name">{paletteInfo.name}</div>
-                        <div>
-                          Start:{" "}
-                          <input
-                            className="start-seconds"
-                            type="time"
-                            step="1"
-                            value={makeTimeString(
-                              paletteInfo.startSeconds,
-                              true
-                            )}
-                            onChange={(event) => {
-                              world.updatePalette(paletteIndex, {
-                                startSeconds: getSecondsFromTimeString(
-                                  event.currentTarget.value
-                                ),
-                              });
-                            }}
-                          />
-                        </div>
-                        <div>
-                          End:{" "}
-                          <input
-                            type="time"
-                            step="1"
-                            value={makeTimeString(paletteInfo.endSeconds, true)}
-                            onChange={(event) => {
-                              world.updatePalette(paletteIndex, {
-                                endSeconds: getSecondsFromTimeString(
-                                  event.currentTarget.value
-                                ),
-                              });
-                            }}
-                          />
-                        </div>
                         <div className="colors">
                           {paletteInfo.colors.map(
                             (color: number[], index: number) => {
@@ -215,20 +181,6 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                             }
                           )}
                         </div>
-                        <button
-                          onClick={() => {
-                            worldRunner.setSeconds(paletteInfo.startSeconds);
-                          }}
-                        >
-                          Go To Start
-                        </button>
-                        <button
-                          onClick={() => {
-                            worldRunner.setSeconds(paletteInfo.endSeconds);
-                          }}
-                        >
-                          Go To End
-                        </button>
                         <button
                           onClick={() => {
                             world.deletePalette(paletteIndex);
@@ -596,13 +548,31 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                               </div>
                               <button
                                 onClick={() => {
+                                  worldRunner.setSeconds(
+                                    modePaletteInfo.startSeconds
+                                  );
+                                }}
+                              >
+                                Go To Start
+                              </button>
+                              <button
+                                onClick={() => {
+                                  worldRunner.setSeconds(
+                                    modePaletteInfo.endSeconds
+                                  );
+                                }}
+                              >
+                                Go To End
+                              </button>
+                              <button
+                                onClick={() => {
                                   world.deleteModePalette(
                                     modeIndex,
                                     modePaletteIndex
                                   );
                                 }}
                               >
-                                Delete Palette
+                                Delete
                               </button>
                             </div>
                           );
