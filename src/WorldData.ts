@@ -26,6 +26,18 @@ export type EventInfo = {
   endPosition: Point;
 };
 
+export type ModePaletteInfo = {
+  paletteId: number;
+  startSeconds: number;
+  endSeconds: number;
+};
+
+export type ModeInfo = {
+  id: number;
+  name: string;
+  modePaletteInfos: ModePaletteInfo[];
+};
+
 export type WorldData = {
   name: string;
   width: number;
@@ -34,6 +46,7 @@ export type WorldData = {
   pixels: number[];
   overlays: OverlayInfo[];
   events: EventInfo[];
+  modes: ModeInfo[];
 };
 
 // ----------
@@ -49,6 +62,15 @@ export function getEmptyEventInfo(): EventInfo {
 }
 
 // ----------
+export function getEmptyModeInfo(): ModeInfo {
+  return {
+    id: 0,
+    name: "",
+    modePaletteInfos: [],
+  };
+}
+
+// ----------
 export function getEmptyWorldData(): WorldData {
   return {
     name: "",
@@ -58,6 +80,7 @@ export function getEmptyWorldData(): WorldData {
     pixels: [],
     overlays: [],
     events: [],
+    modes: [],
   };
 }
 
@@ -75,6 +98,13 @@ export function isValidWorldData(worldData: WorldData): boolean {
   for (const eventInfo of worldData.events) {
     if (eventInfo.id <= 0) {
       console.error("Invalid eventInfo:", eventInfo);
+      return false;
+    }
+  }
+
+  for (const modeInfo of worldData.modes) {
+    if (modeInfo.id <= 0) {
+      console.error("Invalid modeInfo:", modeInfo);
       return false;
     }
   }

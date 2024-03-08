@@ -5,8 +5,11 @@ import { LbmCycle, LbmData, StorageContainer } from "./types";
 import {
   EventInfo,
   getEmptyEventInfo,
+  getEmptyModeInfo,
   getEmptyWorldData,
   isValidWorldData,
+  ModeInfo,
+  ModePaletteInfo,
   PaletteInfo,
   WorldData,
 } from "./WorldData";
@@ -222,6 +225,61 @@ export default class World {
     const { events } = this.data;
     events.splice(eventIndex, 1);
     this.handleChange();
+  }
+
+  // ----------
+  addMode() {
+    const { modes } = this.data;
+    const id = getNextId(modes);
+    const modeInfo = getEmptyModeInfo();
+    modeInfo.id = id;
+    modeInfo.name = `Mode ${id}`;
+    modes.push(modeInfo);
+
+    this.handleChange();
+    return modeInfo;
+  }
+
+  // ----------
+  updateMode(modeIndex: number, newInfo: Partial<ModeInfo>) {
+    const { modes } = this.data;
+    const modeInfo = modes[modeIndex];
+    Object.assign(modeInfo, newInfo);
+    this.handleChange();
+  }
+
+  // ----------
+  updateModePalette(
+    modeIndex: number,
+    modePaletteIndex: number,
+    newInfo: Partial<ModePaletteInfo>
+  ) {
+    const { modes } = this.data;
+    const modeInfo = modes[modeIndex];
+    if (modeInfo) {
+      const modePaletteInfo = modeInfo.modePaletteInfos[modePaletteIndex];
+      if (modePaletteInfo) {
+        Object.assign(modePaletteInfo, newInfo);
+        this.handleChange();
+      }
+    }
+  }
+
+  // ----------
+  deleteMode(modeIndex: number) {
+    const { modes } = this.data;
+    modes.splice(modeIndex, 1);
+    this.handleChange();
+  }
+
+  // ----------
+  deleteModePalette(modeIndex: number, modePaletteIndex: number) {
+    const { modes } = this.data;
+    const modeInfo = modes[modeIndex];
+    if (modeInfo) {
+      modeInfo.modePaletteInfos.splice(modePaletteIndex, 1);
+      this.handleChange();
+    }
   }
 
   // ----------

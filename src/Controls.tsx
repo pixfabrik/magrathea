@@ -2,9 +2,16 @@
 import "./Controls.less";
 import React, { useEffect, useState } from "react";
 import WorldRunner from "./WorldRunner";
-import { EventInfo, OverlayInfo, PaletteInfo } from "./WorldData";
+import {
+  EventInfo,
+  ModeInfo,
+  ModePaletteInfo,
+  OverlayInfo,
+  PaletteInfo,
+} from "./WorldData";
 import { getSecondsFromTimeString, importLbm, makeTimeString } from "./util";
 import { maxSeconds } from "./vars";
+import _ from "lodash";
 
 type ControlsProps = {
   worldRunner: WorldRunner;
@@ -15,6 +22,7 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
   const [paletteAreaOpen, setPaletteAreaOpen] = useState<boolean>(false);
   const [overlayAreaOpen, setOverlayAreaOpen] = useState<boolean>(false);
   const [eventAreaOpen, setEventAreaOpen] = useState<boolean>(false);
+  const [modeAreaOpen, setModeAreaOpen] = useState<boolean>(false);
   const [mode, setMode] = useState<"view" | "edit">("edit");
   const seconds = worldRunner.getSeconds();
   const world = worldRunner.world;
@@ -466,6 +474,170 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                   );
                 }
               )}
+          </div>
+          <div className="resource-area">
+            <div
+              className="area-title"
+              onClick={() => {
+                setModeAreaOpen(!modeAreaOpen);
+              }}
+            >
+              Modes ({worldData.modes.length})
+              <button
+                onClick={(mode) => {
+                  mode.stopPropagation();
+                  setModeAreaOpen(true);
+                  const modeInfo = world.addMode();
+
+                  // world.scheduler.make({
+                  //   modeInfoId: modeInfo.id,
+                  //   progress: 0,
+                  // });
+                }}
+              >
+                Add Mode
+              </button>
+            </div>
+            {modeAreaOpen &&
+              worldData.modes.map((modeInfo: ModeInfo, modeIndex: number) => {
+                return (
+                  <div key={modeInfo.id} className={`resource-info`}>
+                    <div className="name">{modeInfo.name}</div>
+                    <div className="mode-palette-area">
+                      {modeInfo.modePaletteInfos.map(
+                        (
+                          modePaletteInfo: ModePaletteInfo,
+                          modePaletteIndex: number
+                        ) => {
+                          return (
+                            <div
+                              className="mode-palette"
+                              key={modePaletteIndex}
+                            >
+                              <select
+                                value={modePaletteInfo.paletteId}
+                                onChange={(event) => {
+                                  world.updateModePalette(
+                                    modeIndex,
+                                    modePaletteIndex,
+                                    {
+                                      paletteId: parseInt(
+                                        event.currentTarget.value
+                                      ),
+                                    }
+                                  );
+
+                                  // world.scheduler.make({
+                                  //   eventInfoId: eventInfo.id,
+                                  //   progress: 0,
+                                  // });
+                                }}
+                              >
+                                <option key={-1} value={-1}>
+                                  None
+                                </option>
+                                {worldData.paletteInfos.map(
+                                  (paletteInfo: PaletteInfo) => {
+                                    return (
+                                      <option
+                                        key={paletteInfo.id}
+                                        value={paletteInfo.id}
+                                      >
+                                        {paletteInfo.name}
+                                      </option>
+                                    );
+                                  }
+                                )}
+                              </select>
+                              <div>
+                                Start:{" "}
+                                <input
+                                  className="start-seconds"
+                                  type="time"
+                                  step="1"
+                                  value={makeTimeString(
+                                    modePaletteInfo.startSeconds,
+                                    true
+                                  )}
+                                  onChange={(event) => {
+                                    world.updateModePalette(
+                                      modeIndex,
+                                      modePaletteIndex,
+                                      {
+                                        startSeconds: getSecondsFromTimeString(
+                                          event.currentTarget.value
+                                        ),
+                                      }
+                                    );
+                                  }}
+                                />
+                              </div>
+                              <div>
+                                End:{" "}
+                                <input
+                                  type="time"
+                                  step="1"
+                                  value={makeTimeString(
+                                    modePaletteInfo.endSeconds,
+                                    true
+                                  )}
+                                  onChange={(event) => {
+                                    world.updateModePalette(
+                                      modeIndex,
+                                      modePaletteIndex,
+                                      {
+                                        endSeconds: getSecondsFromTimeString(
+                                          event.currentTarget.value
+                                        ),
+                                      }
+                                    );
+                                  }}
+                                />
+                              </div>
+                              <button
+                                onClick={() => {
+                                  world.deleteModePalette(
+                                    modeIndex,
+                                    modePaletteIndex
+                                  );
+                                }}
+                              >
+                                Delete Palette
+                              </button>
+                            </div>
+                          );
+                        }
+                      )}
+                    </div>
+                    <button
+                      onClick={() => {
+                        const modePaletteInfos = _.cloneDeep(
+                          modeInfo.modePaletteInfos
+                        );
+
+                        modePaletteInfos.push({
+                          paletteId: -1,
+                          startSeconds: 0,
+                          endSeconds: 0,
+                        });
+
+                        world.updateMode(modeIndex, {
+                          modePaletteInfos,
+                        });
+                      }}
+                    >
+                      Add Palette
+                    </button>
+                    <button
+                      onClick={() => {
+                        world.deleteMode(modeIndex);
+                      }}
+                    >
+                      Delete Mode
+                    </button>
+                  </div>
+                );
+              })}
           </div>
         </>
       )}

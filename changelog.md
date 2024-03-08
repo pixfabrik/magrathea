@@ -1,5 +1,9 @@
 # Magrathea Change Log
 
+6:
+
+- We now have a "modes" control section. A mode is a sequence of palettes, and can be thought of as different kinds of weather, like clear vs cloudy.
+
 5:
 
 - We now have an "events" control section. An event (at this point) is an overlay that appears for a duration at a location and can move across the screen.

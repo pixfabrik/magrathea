@@ -10,6 +10,10 @@ Requires Node. First time, do an `npm install`. After that, to run:
 
 ### Next
 
+- Be able to see the mode palette infos in a mode in the controls
+- Move palette timing logic from the original palette infos to the mode palette infos
+- Add modes to the scheduler and be able to transition between them
+
 ### Events
 
 - Be able to specify how frequently they appear
@@ -18,10 +22,10 @@ Requires Node. First time, do an `npm install`. After that, to run:
 - Better UI for event duration
 - Be able to have events start off the top and left sides (currently the X and Y can only go down to 0)
 - Min/max for event duration
+- Be able to edit event names
 
 ### Backlog
 
-- Modes for weather
 - Panel for base pixels
 - Remember which panels are expanded or collapsed
 - Color cycling should be based on real time rather than the time slider (so it still cycles smoothly when fast forwarding)
