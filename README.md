@@ -1,6 +1,6 @@
 # Living Worlds Maker
 
-New hair? Check out the [wiki](https://github.com/pixfabrik/magrathea/wiki)!
+New here? Check out the [wiki](https://github.com/pixfabrik/magrathea/wiki)!
 
 ## Running
 
