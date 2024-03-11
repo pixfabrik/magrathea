@@ -30,13 +30,22 @@ function App() {
       <div className="top-nav">
         Living Worlds Maker
         {worldRunner.world.data.name ? " - " + worldRunner.world.data.name : ""}
-        <a
-          className="version"
-          href="https://github.com/pixfabrik/magrathea/blob/main/changelog.md"
-          target="_blank"
-        >
-          v{VERSION}
-        </a>
+        <div className="version-area">
+          <a
+            className="version"
+            href="https://github.com/pixfabrik/magrathea/blob/main/changelog.md"
+            target="_blank"
+          >
+            v{VERSION}
+          </a>{" "}
+          <a
+            className="version"
+            href="https://github.com/pixfabrik/magrathea/wiki"
+            target="_blank"
+          >
+            Help
+          </a>
+        </div>
       </div>
       <div className="main-area">
         <div className="canvas-area">

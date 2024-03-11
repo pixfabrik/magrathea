@@ -77,11 +77,13 @@ export default class World {
     const { paletteInfos } = this.data;
 
     // Find current palette infos
+    let startModePaletteInfo: ModePaletteInfo | null = null;
+    let endModePaletteInfo: ModePaletteInfo | null = null;
+    let startPaletteInfo: PaletteInfo | null = null;
+    let endPaletteInfo: PaletteInfo | null = null;
+
     const modeInfo = this.scheduler.getCurrentModeInfo(nowSeconds);
     if (modeInfo) {
-      let startModePaletteInfo: ModePaletteInfo | null = null,
-        endModePaletteInfo: ModePaletteInfo | null = null;
-
       for (const modePaletteInfo of modeInfo.modePaletteInfos) {
         if (nowSeconds >= modePaletteInfo.startSeconds) {
           startModePaletteInfo = modePaletteInfo;
@@ -96,9 +98,6 @@ export default class World {
         }
       }
 
-      let startPaletteInfo: PaletteInfo | null = null,
-        endPaletteInfo: PaletteInfo | null = null;
-
       if (startModePaletteInfo) {
         startPaletteInfo =
           paletteInfos.find(
@@ -112,53 +111,55 @@ export default class World {
             (paletteInfo) => paletteInfo.id === endModePaletteInfo!.paletteId
           ) || null;
       }
+    } else {
+      startPaletteInfo = paletteInfos[0];
+    }
 
-      if (startModePaletteInfo && startPaletteInfo) {
-        let colors: number[][];
-        let cycles: LbmCycle[];
-        if (endModePaletteInfo && endPaletteInfo) {
-          const progress = mapLinear(
-            nowSeconds,
-            startModePaletteInfo.endSeconds,
-            endModePaletteInfo.startSeconds,
-            0,
-            1,
-            true
-          );
+    if (startPaletteInfo) {
+      let colors: number[][];
+      let cycles: LbmCycle[];
+      if (startModePaletteInfo && endModePaletteInfo && endPaletteInfo) {
+        const progress = mapLinear(
+          nowSeconds,
+          startModePaletteInfo.endSeconds,
+          endModePaletteInfo.startSeconds,
+          0,
+          1,
+          true
+        );
 
-          colors = startPaletteInfo.colors.map((startColor, i) => {
-            const endColor = endPaletteInfo!.colors[i];
-            return [
-              startColor[0] + (endColor[0] - startColor[0]) * progress,
-              startColor[1] + (endColor[1] - startColor[1]) * progress,
-              startColor[2] + (endColor[2] - startColor[2]) * progress,
-            ];
-          });
+        colors = startPaletteInfo.colors.map((startColor, i) => {
+          const endColor = endPaletteInfo!.colors[i];
+          return [
+            startColor[0] + (endColor[0] - startColor[0]) * progress,
+            startColor[1] + (endColor[1] - startColor[1]) * progress,
+            startColor[2] + (endColor[2] - startColor[2]) * progress,
+          ];
+        });
 
-          cycles = startPaletteInfo.cycles;
-        } else {
-          colors = startPaletteInfo.colors.slice();
-          cycles = startPaletteInfo.cycles;
-        }
-
-        for (let i = 0; i < cycles.length; i++) {
-          const cycle = cycles[i];
-          let low = cycle.low;
-          let high = cycle.high;
-          const cycleSize = high - low + 1;
-          const cycleRate = cycle.rate / LBM_CYCLE_RATE_DIVISOR;
-          const cycleAmount = (cycleRate * nowSeconds) % cycleSize;
-          if (cycle.reverse === 2) {
-            [low, high] = [high, low];
-          }
-
-          for (let j = 0; j < cycleAmount; j++) {
-            colors.splice(low, 0, colors.splice(high, 1)[0]);
-          }
-        }
-
-        this.currentColors = colors;
+        cycles = startPaletteInfo.cycles;
+      } else {
+        colors = startPaletteInfo.colors.slice();
+        cycles = startPaletteInfo.cycles;
       }
+
+      for (let i = 0; i < cycles.length; i++) {
+        const cycle = cycles[i];
+        let low = cycle.low;
+        let high = cycle.high;
+        const cycleSize = high - low + 1;
+        const cycleRate = cycle.rate / LBM_CYCLE_RATE_DIVISOR;
+        const cycleAmount = (cycleRate * nowSeconds) % cycleSize;
+        if (cycle.reverse === 2) {
+          [low, high] = [high, low];
+        }
+
+        for (let j = 0; j < cycleAmount; j++) {
+          colors.splice(low, 0, colors.splice(high, 1)[0]);
+        }
+      }
+
+      this.currentColors = colors;
     }
 
     this.draw(nowSeconds);
@@ -581,10 +582,6 @@ export default class World {
 
       if (!fileData.format || fileData.format.type !== WORLD_DATA_TYPE) {
         throw new Error("Wrong file type.");
-      }
-
-      if (fileData.format.version !== WORLD_DATA_VERSION) {
-        throw new Error("Wrong file version.");
       }
 
       if (!fileData.data) {
