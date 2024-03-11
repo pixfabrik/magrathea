@@ -34,6 +34,7 @@ export type EventInfo = {
 };
 
 export type ModePaletteInfo = {
+  id: number;
   paletteId: number;
   startSeconds: number;
   endSeconds: number;
@@ -113,6 +114,13 @@ export function isValidWorldData(worldData: WorldData): boolean {
     if (modeInfo.id <= 0) {
       console.error("Invalid modeInfo:", modeInfo);
       return false;
+    }
+
+    for (const modePaletteInfo of modeInfo.modePaletteInfos) {
+      if (modePaletteInfo.id <= 0) {
+        console.error("Invalid modePaletteInfo:", modePaletteInfo);
+        return false;
+      }
     }
   }
 

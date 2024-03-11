@@ -23,6 +23,8 @@ import {
 } from "./vars";
 import Scheduler from "./Scheduler";
 
+type ModePaletteStatus = "good" | "bad";
+
 const worldStorageKey = "world";
 
 // ----------
@@ -31,9 +33,10 @@ export default class World {
   currentColors: number[][] = [];
   ctx: CanvasRenderingContext2D | null = null;
   pixelData: Uint8ClampedArray = new Uint8ClampedArray(0);
-  paletteStatuses: ("good" | "bad")[] = [];
+  modePaletteStatuses: ModePaletteStatus[][] = [];
   isBad: boolean = false;
   firstDraw: boolean = true;
+
   scheduler = new Scheduler(this);
   onChange: (() => void) | null = null;
 
@@ -271,6 +274,34 @@ export default class World {
   }
 
   // ----------
+  addModePalette(modeIndex: number) {
+    const { modes } = this.data;
+    const modeInfo = modes[modeIndex];
+    if (!modeInfo) {
+      return;
+    }
+
+    const modePaletteInfos = modeInfo.modePaletteInfos;
+    let seconds = 0;
+    if (modePaletteInfos.length) {
+      const startModePaletteInfo =
+        modePaletteInfos[modePaletteInfos.length - 1];
+      startModePaletteInfo.endSeconds = startModePaletteInfo.startSeconds + 60;
+      seconds = startModePaletteInfo.endSeconds + 5;
+    }
+
+    modeInfo.modePaletteInfos.push({
+      id: getNextId(modeInfo.modePaletteInfos),
+      paletteId: -1,
+      startSeconds: seconds,
+      endSeconds: maxSeconds - 1,
+    });
+
+    this.sortModePalettes();
+    this.handleChange();
+  }
+
+  // ----------
   updateMode(modeIndex: number, newInfo: Partial<ModeInfo>) {
     const { modes } = this.data;
     const modeInfo = modes[modeIndex];
@@ -290,6 +321,7 @@ export default class World {
       const modePaletteInfo = modeInfo.modePaletteInfos[modePaletteIndex];
       if (modePaletteInfo) {
         Object.assign(modePaletteInfo, newInfo);
+        this.sortModePalettes();
         this.handleChange();
       }
     }
@@ -373,35 +405,45 @@ export default class World {
     const paletteInfo = paletteInfos[paletteIndex];
     Object.assign(paletteInfo, newInfo);
 
-    this.sortPalettes();
     this.handleChange();
   }
 
   // ----------
-  sortPalettes() {
-    // const { paletteInfos } = this.data;
-    // paletteInfos.sort((a, b) => a.startSeconds - b.startSeconds);
-    // this.isBad = false;
-    // this.paletteStatuses.length = 0;
-    // for (let i = 0; i < paletteInfos.length; i++) {
-    //   this.paletteStatuses[i] = "good";
-    // }
-    // for (let i = 0; i < paletteInfos.length; i++) {
-    //   const paletteInfo = paletteInfos[i];
-    //   if (paletteInfo.endSeconds < paletteInfo.startSeconds) {
-    //     this.paletteStatuses[i] = "bad";
-    //     this.isBad = true;
-    //   }
-    //   const nextPaletteInfo = paletteInfos[i + 1];
-    //   if (
-    //     nextPaletteInfo &&
-    //     paletteInfo.endSeconds > nextPaletteInfo.startSeconds
-    //   ) {
-    //     this.paletteStatuses[i] = "bad";
-    //     this.paletteStatuses[i + 1] = "bad";
-    //     this.isBad = true;
-    //   }
-    // }
+  sortModePalettes() {
+    const { modes } = this.data;
+    const { modePaletteStatuses } = this;
+    modePaletteStatuses.length = 0;
+    this.isBad = false; // TODO: Have this per mode
+
+    for (const mode of modes) {
+      const modePaletteInfos = mode.modePaletteInfos;
+      modePaletteInfos.sort((a, b) => a.startSeconds - b.startSeconds);
+
+      const statuses: ModePaletteStatus[] = [];
+      modePaletteStatuses.push(statuses);
+
+      for (let i = 0; i < modePaletteInfos.length; i++) {
+        statuses[i] = "good";
+      }
+
+      for (let i = 0; i < modePaletteInfos.length; i++) {
+        const modePaletteInfo = modePaletteInfos[i];
+        if (modePaletteInfo.endSeconds < modePaletteInfo.startSeconds) {
+          statuses[i] = "bad";
+          this.isBad = true;
+        }
+
+        const nextmodePaletteInfo = modePaletteInfos[i + 1];
+        if (
+          nextmodePaletteInfo &&
+          modePaletteInfo.endSeconds > nextmodePaletteInfo.startSeconds
+        ) {
+          statuses[i] = "bad";
+          statuses[i + 1] = "bad";
+          this.isBad = true;
+        }
+      }
+    }
   }
 
   // ----------
@@ -581,6 +623,7 @@ export default class World {
           paletteInfo.endSeconds %= maxSeconds;
 
           const modePaletteInfo = {
+            id: getNextId(modeInfo.modePaletteInfos),
             paletteId: paletteInfo.id,
             startSeconds: paletteInfo.startSeconds,
             endSeconds: paletteInfo.endSeconds,
@@ -600,13 +643,22 @@ export default class World {
       _.defaultsDeep(event, getEmptyEventInfo());
     }
 
+    for (const mode of newData.modes) {
+      _.defaultsDeep(mode, getEmptyModeInfo());
+      for (const modePalette of mode.modePaletteInfos) {
+        if (!modePalette.id) {
+          modePalette.id = getNextId(mode.modePaletteInfos);
+        }
+      }
+    }
+
     if (!isValidWorldData(newData)) {
       // return;
     }
 
     this.data = newData;
 
-    this.sortPalettes();
+    this.sortModePalettes();
     this.updateForImage();
 
     // console.log(this.paletteInfos);

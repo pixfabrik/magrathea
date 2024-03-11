@@ -24,6 +24,12 @@ Requires Node. First time, do an `npm install`. After that, to run:
 
 ### Backlog
 
+- Treat mode palette infos that don't have a palette ID as if they don't exist
+- Transparent base layer issue - https://github.com/pixfabrik/magrathea/issues/1
+- Be able to import GIF
+- Be able to import PNG8
+- "load overlay pixels" doesn't seem to work with LBM files… Actually it does seem to work but it doesn't update the UI evidently.
+- Be able to expand and collapse individual modes
 - Panel for base pixels
 - Remember which panels are expanded or collapsed
 - Color cycling should be based on real time rather than the time slider (so it still cycles smoothly when fast forwarding)

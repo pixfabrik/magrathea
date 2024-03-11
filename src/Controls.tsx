@@ -12,6 +12,7 @@ import {
 import { getSecondsFromTimeString, importLbm, makeTimeString } from "./util";
 import { maxSeconds } from "./vars";
 import _ from "lodash";
+import classNames from "classnames";
 
 type ControlsProps = {
   worldRunner: WorldRunner;
@@ -157,14 +158,7 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                 {worldData.paletteInfos.map(
                   (paletteInfo: PaletteInfo, paletteIndex: number) => {
                     return (
-                      <div
-                        key={paletteInfo.id}
-                        className={`resource-info ${
-                          world.paletteStatuses[paletteIndex] === "bad"
-                            ? "bad"
-                            : ""
-                        }`}
-                      >
+                      <div key={paletteInfo.id} className="resource-info">
                         <div className="name">{paletteInfo.name}</div>
                         <div className="colors">
                           {paletteInfo.colors.map(
@@ -463,8 +457,13 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                         ) => {
                           return (
                             <div
-                              className="mode-palette"
-                              key={modePaletteIndex}
+                              className={classNames(
+                                "mode-palette",
+                                world.modePaletteStatuses[modeIndex]?.[
+                                  modePaletteIndex
+                                ] === "bad" && "bad"
+                              )}
+                              key={modePaletteInfo.id}
                             >
                               <select
                                 value={modePaletteInfo.paletteId}
@@ -581,19 +580,7 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                     </div>
                     <button
                       onClick={() => {
-                        const modePaletteInfos = _.cloneDeep(
-                          modeInfo.modePaletteInfos
-                        );
-
-                        modePaletteInfos.push({
-                          paletteId: -1,
-                          startSeconds: 0,
-                          endSeconds: 0,
-                        });
-
-                        world.updateMode(modeIndex, {
-                          modePaletteInfos,
-                        });
+                        world.addModePalette(modeIndex);
                       }}
                     >
                       Add Palette
