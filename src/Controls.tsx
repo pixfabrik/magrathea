@@ -435,10 +435,7 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                   setModeAreaOpen(true);
                   const modeInfo = world.addMode();
 
-                  // world.scheduler.make({
-                  //   modeInfoId: modeInfo.id,
-                  //   progress: 0,
-                  // });
+                  world.scheduler.setMode(modeInfo.id);
                 }}
               >
                 Add Mode
@@ -478,10 +475,7 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                                     }
                                   );
 
-                                  // world.scheduler.make({
-                                  //   eventInfoId: eventInfo.id,
-                                  //   progress: 0,
-                                  // });
+                                  world.scheduler.setMode(modeInfo.id);
                                 }}
                               >
                                 <option key={-1} value={-1}>
@@ -520,6 +514,8 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                                         ),
                                       }
                                     );
+
+                                    world.scheduler.setMode(modeInfo.id);
                                   }}
                                 />
                               </div>
@@ -542,11 +538,15 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                                         ),
                                       }
                                     );
+
+                                    world.scheduler.setMode(modeInfo.id);
                                   }}
                                 />
                               </div>
                               <button
                                 onClick={() => {
+                                  world.scheduler.setMode(modeInfo.id);
+
                                   worldRunner.setSeconds(
                                     modePaletteInfo.startSeconds
                                   );
@@ -556,6 +556,8 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                               </button>
                               <button
                                 onClick={() => {
+                                  world.scheduler.setMode(modeInfo.id);
+
                                   worldRunner.setSeconds(
                                     modePaletteInfo.endSeconds
                                   );
@@ -569,6 +571,8 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                                     modeIndex,
                                     modePaletteIndex
                                   );
+
+                                  world.scheduler.setMode(modeInfo.id);
                                 }}
                               >
                                 Delete
@@ -581,6 +585,8 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                     <button
                       onClick={() => {
                         world.addModePalette(modeIndex);
+
+                        world.scheduler.setMode(modeInfo.id);
                       }}
                     >
                       Add Palette

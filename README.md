@@ -25,6 +25,7 @@ Requires Node. First time, do an `npm install`. After that, to run:
 ### Backlog
 
 - Treat mode palette infos that don't have a palette ID as if they don't exist
+- If a mode palette info doesn't exist at the beginning or end of the day, just extend the time
 - Transparent base layer issue - https://github.com/pixfabrik/magrathea/issues/1
 - Be able to import GIF
 - Be able to import PNG8

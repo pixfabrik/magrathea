@@ -21,6 +21,7 @@ export type ScheduleEvent = {
 export default class Scheduler {
   world: World;
   eventArgsArray: SchedulerMakeArgs[] = [];
+  modeId: number = -1;
 
   // ----------
   constructor(world: World) {
@@ -30,6 +31,11 @@ export default class Scheduler {
   // ----------
   clear() {
     this.eventArgsArray = [];
+  }
+
+  // ----------
+  setMode(modeId: number) {
+    this.modeId = modeId;
   }
 
   // ----------
@@ -123,6 +129,10 @@ export default class Scheduler {
 
   // ----------
   getCurrentModeInfo(nowSeconds: number) {
-    return this.world.data.modes[0];
+    const modeInfo = this.world.data.modes.find(
+      (mode) => mode.id === this.modeId
+    );
+
+    return modeInfo || this.world.data.modes[0] || null;
   }
 }
