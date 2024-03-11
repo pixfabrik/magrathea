@@ -467,13 +467,18 @@ export default class World {
 
     for (let i = 0; i < pixels.length; i++) {
       const pixel = pixels[i];
+      const p = i * 4;
       const color = currentColors[pixel];
       if (color) {
-        const p = i * 4;
         pixelData[p] = color[0]; // Red channel
         pixelData[p + 1] = color[1]; // Green channel
         pixelData[p + 2] = color[2]; // Blue channel
         pixelData[p + 3] = 255; // Alpha channel (opacity)
+      } else {
+        pixelData[p] = 0; // Red channel
+        pixelData[p + 1] = 0; // Green channel
+        pixelData[p + 2] = 0; // Blue channel
+        pixelData[p + 3] = 0; // Alpha channel (opacity)
       }
     }
 

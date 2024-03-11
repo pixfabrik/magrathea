@@ -4,6 +4,7 @@
 
 - We now have a "modes" control section. A mode is a sequence of palettes, and can be thought of as different kinds of weather, like clear vs cloudy.
 - Added "Help" link at the top.
+- Fixed a bug where base pixels with transparency wouldn't get erased properly during an overlay animation. [#1]
 
 5:
 
