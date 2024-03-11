@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import WorldRunner from "./WorldRunner";
 import Controls from "./Controls";
 
-const VERSION = 5;
+const VERSION = 6;
 
 const worldRunner = new WorldRunner();
 
