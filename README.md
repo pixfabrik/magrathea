@@ -1,5 +1,7 @@
 # Living Worlds Maker
 
+New here? Check out the [wiki](https://github.com/pixfabrik/magrathea/wiki)!
+
 ## Running
 
 Requires Node. First time, do an `npm install`. After that, to run:
