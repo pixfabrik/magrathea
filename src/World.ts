@@ -173,10 +173,16 @@ export default class World {
 
   // ----------
   loadImage(data: LbmData) {
-    if (data.pixels.length !== data.width * data.height) {
+    if (data.layers.length === 0) {
+      console.error("no layers");
+      return;
+    }
+
+    const pixels = data.layers[0].pixels;
+    if (pixels.length !== data.width * data.height) {
       console.error(
         "bad size",
-        data.pixels.length,
+        pixels.length,
         data.width,
         data.height,
         data.width * data.height
@@ -187,7 +193,18 @@ export default class World {
     this.data.name = data.name;
     this.data.width = data.width;
     this.data.height = data.height;
-    this.data.pixels = data.pixels;
+    this.data.pixels = pixels;
+
+    for (let i = 1; i < data.layers.length; i++) {
+      const layer = data.layers[i];
+      this.data.overlays.push({
+        id: getNextId(this.data.overlays),
+        name: layer.name,
+        width: data.width,
+        height: data.height,
+        pixels: layer.pixels,
+      });
+    }
 
     this.updateForImage();
     this.loadColors(data);
@@ -210,13 +227,22 @@ export default class World {
   // ----------
   loadOverlay(data: LbmData) {
     const { overlays } = this.data;
-    overlays.push({
-      id: getNextId(overlays),
-      name: data.name,
-      width: data.width,
-      height: data.height,
-      pixels: data.pixels,
-    });
+
+    if (data.layers.length === 0) {
+      console.error("no layers");
+      return;
+    }
+
+    for (let i = 0; i < data.layers.length; i++) {
+      const layer = data.layers[i];
+      this.data.overlays.push({
+        id: getNextId(this.data.overlays),
+        name: layer.name,
+        width: data.width,
+        height: data.height,
+        pixels: layer.pixels,
+      });
+    }
 
     this.handleChange();
   }

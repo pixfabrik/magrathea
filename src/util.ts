@@ -7,6 +7,7 @@ import {
   DPaintJsData,
   StorageContainer,
   ObjectWithId,
+  LbmLayer,
 } from "./types";
 import { LBM_CYCLE_RATE_DIVISOR, WORLD_DATA_TYPE } from "./vars";
 
@@ -169,7 +170,14 @@ export async function importLbm(types: string[]): Promise<LbmData> {
     // console.log("File uploaded successfully:", data, file);
     const { width, height, colors, pixels, cycles } = data;
     const { name } = file;
-    return { name, width, height, colors, pixels, cycles };
+    return {
+      name,
+      width,
+      height,
+      colors,
+      layers: [{ name, pixels }],
+      cycles,
+    };
   }
 
   const data = file as DPaintJsData;
@@ -188,7 +196,9 @@ export async function importLbm(types: string[]): Promise<LbmData> {
   }
 
   if (!data.indexedPixels) {
-    throw new Error("No pixels found; add color cycles and save again.");
+    throw new Error(
+      "No pixels found; you must save the file as 'Indexed' format (it's under More)."
+    );
   }
 
   const cycles: LbmCycle[] = data.colorRange
@@ -202,12 +212,27 @@ export async function importLbm(types: string[]): Promise<LbmData> {
       };
     });
 
+  const layers: LbmLayer[] = [];
+  for (const layer of data.image.frames[0]?.layers ?? []) {
+    layers.push({
+      name: layer.name,
+      pixels: layer.indexedPixels.flat(),
+    });
+  }
+
+  if (!layers.length) {
+    layers.push({
+      name: data.image.name,
+      pixels: data.indexedPixels.flat(),
+    });
+  }
+
   return {
     name: data.image.name,
     width: data.image.width,
     height: data.image.height,
     colors: data.palette,
-    pixels: data.indexedPixels.flat(),
+    layers,
     cycles,
   };
 }

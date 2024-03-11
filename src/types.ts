@@ -13,12 +13,17 @@ export type LbmCycle = {
   reverse: number;
 };
 
+export type LbmLayer = {
+  name: string;
+  pixels: number[];
+};
+
 export type LbmData = {
   name: string;
   width: number;
   height: number;
   colors: number[][];
-  pixels: number[];
+  layers: LbmLayer[];
   cycles: LbmCycle[];
 };
 
@@ -33,6 +38,15 @@ export type DPaintJsCycle = {
   rate: number;
 };
 
+export type DPaintJsLayer = {
+  name: string;
+  indexedPixels: number[][];
+};
+
+export type DPaintJsFrame = {
+  layers: DPaintJsLayer[];
+};
+
 export type DPaintJsData = {
   type: string;
   colorRange: DPaintJsCycle[];
@@ -40,6 +54,7 @@ export type DPaintJsData = {
     name: string;
     width: number;
     height: number;
+    frames: DPaintJsFrame[];
   };
   palette: number[][];
   indexedPixels: number[][];
