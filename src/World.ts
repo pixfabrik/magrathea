@@ -515,13 +515,7 @@ export default class World {
         continue;
       }
 
-      const eventInfo = events.find(
-        (eventInfo) => eventInfo.id === scheduleEvent.eventInfoId
-      );
-
-      if (!eventInfo) {
-        continue;
-      }
+      const eventInfo = scheduleEvent.eventInfo;
 
       const overlay = overlays.find(
         (overlay) => overlay.id === eventInfo.overlayId

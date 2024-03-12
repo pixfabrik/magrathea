@@ -1,5 +1,9 @@
 # Magrathea Change Log
 
+7:
+
+- Added "Show" buttons to palettes and overlays so you can see them without having to put them in modes/events.
+
 6:
 
 - We now have a "modes" control section. A mode is a sequence of palettes, and can be thought of as different kinds of weather, like clear vs cloudy.

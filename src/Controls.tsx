@@ -177,6 +177,13 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                         </div>
                         <button
                           onClick={() => {
+                            world.scheduler.setPalette(paletteInfo.id);
+                          }}
+                        >
+                          Show
+                        </button>
+                        <button
+                          onClick={() => {
                             world.deletePalette(paletteIndex);
                           }}
                         >
@@ -217,6 +224,13 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                     return (
                       <div key={overlayInfo.id} className={`resource-info`}>
                         <div className="name">{overlayInfo.name}</div>
+                        <button
+                          onClick={() => {
+                            world.scheduler.setOverlay(overlayInfo.id);
+                          }}
+                        >
+                          Show
+                        </button>
                         <button
                           onClick={() => {
                             world.deleteOverlay(overlayIndex);
