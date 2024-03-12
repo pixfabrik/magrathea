@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import "./Controls.less";
 import React, { useEffect, useState } from "react";
-import WorldRunner from "./WorldRunner";
+import WorldRunner from "../WorldRunner";
 import {
   EventInfo,
   ModeInfo,
   ModePaletteInfo,
   OverlayInfo,
   PaletteInfo,
-} from "./WorldData";
-import { getSecondsFromTimeString, importLbm, makeTimeString } from "./util";
-import { maxSeconds } from "./vars";
+} from "../WorldData";
+import { getSecondsFromTimeString, importLbm, makeTimeString } from "../util";
+import { maxSeconds } from "../vars";
 import _ from "lodash";
 import classNames from "classnames";
 

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import "./App.less";
 import { useEffect, useRef, useState } from "react";
-import WorldRunner from "./WorldRunner";
+import WorldRunner from "../WorldRunner";
 import Controls from "./Controls";
 
 const VERSION = 6;
