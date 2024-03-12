@@ -48,6 +48,10 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(distPath, "index.html"));
 });
 
+app.get("/viewer", (req, res) => {
+  res.sendFile(path.join(distPath, "viewer.html"));
+});
+
 app.listen(port, () => {
   console.log(`App listening on port ${port}!`);
 });

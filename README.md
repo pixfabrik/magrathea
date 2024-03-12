@@ -16,7 +16,6 @@ Requires Node. First time, do an `npm install`. After that, to run:
 - Treat mode palette infos that don't have a palette ID as if they don't exist
 - If a mode palette info doesn't exist at the beginning or end of the day, just extend the time
 - Be able to expand and collapse individual modes and events
-- Viewer app
 
 ### Events
 

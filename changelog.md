@@ -4,6 +4,7 @@
 
 - Added "Show" buttons to palettes and overlays so you can see them without having to put them in modes/events.
 - There's now a status bar at the bottom to let you know what is currently being shown.
+- Started a "viewer app"... It's accessible by adding `viewer` to the URL.
 
 6:
 
