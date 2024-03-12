@@ -13,19 +13,30 @@ Requires Node. First time, do an `npm install`. After that, to run:
 ### Next
 
 - Add modes to the scheduler and be able to transition between them
-- Treat mode palette infos that don't have a palette ID as if they don't exist
-- If a mode palette info doesn't exist at the beginning or end of the day, just extend the time
 - Be able to expand and collapse individual modes and events
+- Make sure everything with IDs points to valid objects. When something is deleted, check for things that reference it.
 
 ### Events
 
 - Be able to specify how frequently they appear
 - Be able to specify time ranges they appear during
 - Be able to have multiple overlays it can choose from at random
+- Be able to lay multiple overlays in sequence
+- Be able to animate through overlays or have an overlay sprite sheet
 - Better UI for event duration
 - Be able to have events start off the top and left sides (currently the X and Y can only go down to 0)
 - Min/max for event duration
 - Be able to edit event names
+- Dither on and off
+
+### Viewer
+
+- UI for changing time
+- UI to show current time
+- Crop vs. letterbox feature
+- Be able to pan when cropped
+- Instead of view/edit controls in editor, have it link to the viewer (and provide a link back)
+- Optional status bar?
 
 ### Backlog
 

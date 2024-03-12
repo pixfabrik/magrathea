@@ -99,6 +99,10 @@ export default class World {
       status.mode = modeInfo.name;
 
       for (const modePaletteInfo of modeInfo.modePaletteInfos) {
+        if (modePaletteInfo.paletteId === -1) {
+          continue;
+        }
+
         if (nowSeconds >= modePaletteInfo.startSeconds) {
           startModePaletteInfo = modePaletteInfo;
 
@@ -108,6 +112,9 @@ export default class World {
           }
         } else if (startModePaletteInfo) {
           endModePaletteInfo = modePaletteInfo;
+          break;
+        } else {
+          startModePaletteInfo = modePaletteInfo;
           break;
         }
       }
