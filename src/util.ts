@@ -236,3 +236,8 @@ export async function importLbm(types: string[]): Promise<LbmData> {
     cycles,
   };
 }
+
+// ----------
+export function pluralize(word: string, count: number) {
+  return count === 1 ? word : word + "s";
+}

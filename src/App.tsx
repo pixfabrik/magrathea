@@ -22,6 +22,10 @@ function App() {
     worldRunner.world.onChange = () => {
       setChangeCount(changeCount + 1);
     };
+
+    worldRunner.onStatusChange = () => {
+      setChangeCount(changeCount + 1);
+    };
   }, [changeCount]);
 
   return (
@@ -53,6 +57,7 @@ function App() {
         </div>
         <Controls worldRunner={worldRunner}></Controls>
       </div>
+      <div className="status-bar">{worldRunner.status}</div>
       {/* </AppContext.Provider> */}
     </div>
   );

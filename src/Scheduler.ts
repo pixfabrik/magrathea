@@ -194,10 +194,11 @@ export default class Scheduler {
       }
     }
 
-    const modeInfo = this.world.data.modes.find(
-      (mode) => mode.id === this.modeId
-    );
+    const modeInfo =
+      this.world.data.modes.find((mode) => mode.id === this.modeId) ||
+      this.world.data.modes[0] ||
+      null;
 
-    return modeInfo || this.world.data.modes[0] || null;
+    return modeInfo;
   }
 }

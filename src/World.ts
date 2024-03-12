@@ -14,7 +14,14 @@ import {
   PaletteInfoV1,
   WorldData,
 } from "./WorldData";
-import { getDateString, getNextId, importFile, lerp, mapLinear } from "./util";
+import {
+  getDateString,
+  getNextId,
+  importFile,
+  lerp,
+  mapLinear,
+  pluralize,
+} from "./util";
 import {
   maxSeconds,
   LBM_CYCLE_RATE_DIVISOR,
@@ -76,6 +83,11 @@ export default class World {
   frame(nowSeconds: number) {
     const { paletteInfos } = this.data;
 
+    const status = {
+      mode: "",
+      palette: "",
+    };
+
     // Find current palette infos
     let startModePaletteInfo: ModePaletteInfo | null = null;
     let endModePaletteInfo: ModePaletteInfo | null = null;
@@ -84,6 +96,8 @@ export default class World {
 
     const modeInfo = this.scheduler.getCurrentModeInfo(nowSeconds);
     if (modeInfo) {
+      status.mode = modeInfo.name;
+
       for (const modePaletteInfo of modeInfo.modePaletteInfos) {
         if (nowSeconds >= modePaletteInfo.startSeconds) {
           startModePaletteInfo = modePaletteInfo;
@@ -119,6 +133,8 @@ export default class World {
       let colors: number[][];
       let cycles: LbmCycle[];
       if (startModePaletteInfo && endModePaletteInfo && endPaletteInfo) {
+        status.palette = `${startPaletteInfo.name} -> ${endPaletteInfo.name}`;
+
         const progress = mapLinear(
           nowSeconds,
           startModePaletteInfo.endSeconds,
@@ -139,6 +155,7 @@ export default class World {
 
         cycles = startPaletteInfo.cycles;
       } else {
+        status.palette = startPaletteInfo.name;
         colors = startPaletteInfo.colors.slice();
         cycles = startPaletteInfo.cycles;
       }
@@ -162,7 +179,41 @@ export default class World {
       this.currentColors = colors;
     }
 
-    this.draw(nowSeconds);
+    const drawStatus = this.draw(nowSeconds);
+
+    const statusArray = [];
+
+    if (drawStatus.error) {
+      statusArray.push(drawStatus.error);
+    } else {
+      if (status.mode) {
+        statusArray.push(`Mode: ${status.mode}`);
+      }
+
+      if (status.palette) {
+        statusArray.push(`Palette: ${status.palette}`);
+      }
+
+      if (drawStatus.events.length) {
+        statusArray.push(
+          `${pluralize(
+            "Event",
+            drawStatus.events.length
+          )}: ${drawStatus.events.join(", ")}`
+        );
+      }
+
+      if (drawStatus.overlays.length) {
+        statusArray.push(
+          `${pluralize(
+            "Overlay",
+            drawStatus.overlays.length
+          )}: ${drawStatus.overlays.join(", ")}`
+        );
+      }
+    }
+
+    return statusArray.join(" - ");
   }
 
   // ----------
@@ -479,14 +530,29 @@ export default class World {
 
     const { width, height, pixels, overlays, events } = this.data;
 
-    if (
-      !ctx ||
-      !width ||
-      !height ||
-      !currentColors.length ||
-      (isBad && !firstDraw)
-    ) {
-      return;
+    const status: {
+      error: string;
+      events: string[];
+      overlays: string[];
+    } = {
+      error: "",
+      events: [],
+      overlays: [],
+    };
+
+    if (!ctx || !width || !height) {
+      status.error = "No base pixels.";
+      return status;
+    }
+
+    if (!currentColors.length) {
+      status.error = "No palette.";
+      return status;
+    }
+
+    if (isBad && !firstDraw) {
+      status.error = "The palette sequence in the current mode has overlaps.";
+      return status;
     }
 
     this.firstDraw = false;
@@ -524,6 +590,12 @@ export default class World {
       if (!overlay) {
         continue;
       }
+
+      if (eventInfo.name) {
+        status.events.push(eventInfo.name);
+      }
+
+      status.overlays.push(overlay.name);
 
       const baseX = Math.round(
         lerp(
@@ -566,6 +638,7 @@ export default class World {
     const imageData = new ImageData(pixelData, width, height);
 
     ctx.putImageData(imageData, 0, 0);
+    return status;
   }
 
   // ----------

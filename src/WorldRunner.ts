@@ -3,9 +3,11 @@ import World from "./World";
 // ----------
 export default class WorldRunner {
   world: World;
+  status: string = "";
   midnightSeconds: number;
   offsetSeconds = 0;
   onChange: (() => void) | null = null;
+  onStatusChange: (() => void) | null = null;
 
   // ----------
   constructor() {
@@ -45,7 +47,13 @@ export default class WorldRunner {
       requestAnimationFrame(frame);
 
       const nowSeconds = this.getSeconds();
-      this.world.frame(nowSeconds);
+      const newStatus = this.world.frame(nowSeconds);
+      if (newStatus !== this.status) {
+        this.status = newStatus;
+        if (this.onStatusChange) {
+          this.onStatusChange();
+        }
+      }
     };
 
     requestAnimationFrame(frame);
