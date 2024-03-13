@@ -12,7 +12,6 @@ Requires Node. First time, do an `npm install`. After that, to run:
 
 ### Next
 
-- Add modes to the scheduler and be able to transition between them
 - Be able to expand and collapse individual modes and events
 - Make sure everything with IDs points to valid objects. When something is deleted, check for things that reference it.
 

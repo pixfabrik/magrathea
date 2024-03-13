@@ -2,7 +2,7 @@
 
 8:
 
-- The scheduler now schedules out modes (when in view mode).
+- The scheduler now schedules out modes (when in view mode) and transitions between them.
 
 7:
 

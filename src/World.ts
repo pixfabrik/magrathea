@@ -30,6 +30,13 @@ import {
 } from "./vars";
 import Scheduler from "./Scheduler";
 
+type ModePalette = {
+  colors: number[][];
+  cycles: LbmCycle[];
+  modeStatus: string;
+  paletteStatus: string;
+};
+
 type ModePaletteStatus = "good" | "bad";
 
 const worldStorageKey = "world";
@@ -88,89 +95,44 @@ export default class World {
       palette: "",
     };
 
-    // Find current palette infos
-    let startModePaletteInfo: ModePaletteInfo | null = null;
-    let endModePaletteInfo: ModePaletteInfo | null = null;
-    let startPaletteInfo: PaletteInfo | null = null;
-    let endPaletteInfo: PaletteInfo | null = null;
-
     const currentModeInfos = this.scheduler.getCurrentModeInfos(nowSeconds);
-    const modeInfo = currentModeInfos.startModeInfo; // TODO: transition
-    if (modeInfo) {
-      for (const modePaletteInfo of modeInfo.modePaletteInfos) {
-        if (modePaletteInfo.paletteId === -1) {
-          continue;
-        }
 
-        if (nowSeconds >= modePaletteInfo.startSeconds) {
-          startModePaletteInfo = modePaletteInfo;
+    let startModePalette: ModePalette | null = null;
+    let endModePalette: ModePalette | null = null;
 
-          if (nowSeconds < modePaletteInfo.endSeconds) {
-            endModePaletteInfo = null;
-            break;
-          }
-        } else if (startModePaletteInfo) {
-          endModePaletteInfo = modePaletteInfo;
-          break;
-        } else {
-          startModePaletteInfo = modePaletteInfo;
-          break;
-        }
-      }
-
-      if (startModePaletteInfo) {
-        startPaletteInfo =
-          paletteInfos.find(
-            (paletteInfo) => paletteInfo.id === startModePaletteInfo!.paletteId
-          ) || null;
-      }
-
-      if (endModePaletteInfo) {
-        endPaletteInfo =
-          paletteInfos.find(
-            (paletteInfo) => paletteInfo.id === endModePaletteInfo!.paletteId
-          ) || null;
-      }
-
-      if (startPaletteInfo) {
-        status.mode = modeInfo.name;
-      }
+    if (currentModeInfos.startModeInfo) {
+      startModePalette = this.getModePalette(
+        currentModeInfos.startModeInfo,
+        nowSeconds
+      );
     }
 
-    if (!startPaletteInfo) {
-      startPaletteInfo = paletteInfos[0];
+    if (currentModeInfos.endModeInfo) {
+      endModePalette = this.getModePalette(
+        currentModeInfos.endModeInfo,
+        nowSeconds
+      );
     }
 
-    if (startPaletteInfo) {
-      let colors: number[][];
-      let cycles: LbmCycle[];
-      if (startModePaletteInfo && endModePaletteInfo && endPaletteInfo) {
-        status.palette = `${startPaletteInfo.name} -> ${endPaletteInfo.name}`;
-
-        const progress = mapLinear(
-          nowSeconds,
-          startModePaletteInfo.endSeconds,
-          endModePaletteInfo.startSeconds,
-          0,
-          1,
-          true
+    if (startModePalette) {
+      let colors: number[][] = [];
+      if (startModePalette && endModePalette) {
+        colors = this.blendPaletteColors(
+          startModePalette.colors,
+          endModePalette.colors,
+          currentModeInfos.progress
         );
 
-        colors = startPaletteInfo.colors.map((startColor, i) => {
-          const endColor = endPaletteInfo!.colors[i];
-          return [
-            startColor[0] + (endColor[0] - startColor[0]) * progress,
-            startColor[1] + (endColor[1] - startColor[1]) * progress,
-            startColor[2] + (endColor[2] - startColor[2]) * progress,
-          ];
-        });
-
-        cycles = startPaletteInfo.cycles;
+        status.mode = `${startModePalette.modeStatus} => ${endModePalette.modeStatus}`;
+        status.palette = `${startModePalette.paletteStatus} => ${endModePalette.paletteStatus}`;
       } else {
-        status.palette = startPaletteInfo.name;
-        colors = startPaletteInfo.colors.slice();
-        cycles = startPaletteInfo.cycles;
+        colors = startModePalette.colors;
+        status.mode = startModePalette.modeStatus;
+        status.palette = startModePalette.paletteStatus;
       }
+
+      // TODO: Do a better job about blending cycles
+      const cycles = startModePalette.cycles;
 
       for (let i = 0; i < cycles.length; i++) {
         const cycle = cycles[i];
@@ -226,6 +188,126 @@ export default class World {
     }
 
     return statusArray.join(" - ");
+  }
+
+  // ----------
+  getModePalette(modeInfo: ModeInfo, nowSeconds: number): ModePalette | null {
+    const { paletteInfos } = this.data;
+    let modeStatus = "";
+    let paletteStatus = "";
+    let startModePaletteInfo: ModePaletteInfo | null = null;
+    let endModePaletteInfo: ModePaletteInfo | null = null;
+    let startPaletteInfo: PaletteInfo | null = null;
+    let endPaletteInfo: PaletteInfo | null = null;
+
+    if (modeInfo) {
+      for (const modePaletteInfo of modeInfo.modePaletteInfos) {
+        if (modePaletteInfo.paletteId === -1) {
+          continue;
+        }
+
+        if (nowSeconds >= modePaletteInfo.startSeconds) {
+          startModePaletteInfo = modePaletteInfo;
+
+          if (nowSeconds < modePaletteInfo.endSeconds) {
+            endModePaletteInfo = null;
+            break;
+          }
+        } else if (startModePaletteInfo) {
+          endModePaletteInfo = modePaletteInfo;
+          break;
+        } else {
+          startModePaletteInfo = modePaletteInfo;
+          break;
+        }
+      }
+
+      if (startModePaletteInfo) {
+        startPaletteInfo =
+          paletteInfos.find(
+            (paletteInfo) => paletteInfo.id === startModePaletteInfo!.paletteId
+          ) || null;
+      }
+
+      if (endModePaletteInfo) {
+        endPaletteInfo =
+          paletteInfos.find(
+            (paletteInfo) => paletteInfo.id === endModePaletteInfo!.paletteId
+          ) || null;
+      }
+
+      if (startPaletteInfo) {
+        modeStatus = modeInfo.name;
+      }
+    }
+
+    if (!startPaletteInfo) {
+      startPaletteInfo = paletteInfos[0];
+    }
+
+    if (startPaletteInfo) {
+      let colors: number[][] = [];
+      let cycles: LbmCycle[] = [];
+      if (startModePaletteInfo && endModePaletteInfo && endPaletteInfo) {
+        paletteStatus = `${startPaletteInfo.name} -> ${endPaletteInfo.name}`;
+
+        const progress = mapLinear(
+          nowSeconds,
+          startModePaletteInfo.endSeconds,
+          endModePaletteInfo.startSeconds,
+          0,
+          1,
+          true
+        );
+
+        colors = this.blendPaletteColors(
+          startPaletteInfo.colors,
+          endPaletteInfo.colors,
+          progress
+        );
+
+        cycles = startPaletteInfo.cycles;
+      } else {
+        paletteStatus = startPaletteInfo.name;
+        colors = startPaletteInfo.colors.slice();
+        cycles = startPaletteInfo.cycles;
+      }
+
+      return { colors, cycles, modeStatus, paletteStatus };
+    }
+
+    return null;
+  }
+
+  // ----------
+  blendPaletteColors(
+    startColors: number[][],
+    endColors: number[][],
+    progress: number
+  ) {
+    const newColors = [];
+    const count = Math.max(startColors.length, endColors.length);
+    for (let i = 0; i < count; i++) {
+      const startColor = startColors[i];
+      const endColor = endColors[i];
+      if (startColor) {
+        if (endColor) {
+          newColors.push([
+            startColor[0] + (endColor[0] - startColor[0]) * progress,
+            startColor[1] + (endColor[1] - startColor[1]) * progress,
+            startColor[2] + (endColor[2] - startColor[2]) * progress,
+          ]);
+        } else {
+          newColors.push(startColor);
+        }
+      } else if (endColor) {
+        newColors.push(endColor);
+      } else {
+        newColors.push([0, 0, 0]);
+      }
+    }
+
+    return newColors;
   }
 
   // ----------
