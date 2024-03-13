@@ -3,6 +3,7 @@
 8:
 
 - The scheduler now schedules out modes (when in view mode) and transitions between them.
+- Added "Next Mode Transition" button to the view mode.
 
 7:
 

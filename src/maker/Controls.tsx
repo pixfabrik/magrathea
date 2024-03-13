@@ -111,6 +111,20 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
             >
               Next Event
             </button>
+            <button
+              onClick={() => {
+                const startSeconds =
+                  world.scheduler.getNextModeTransitionSeconds(seconds);
+
+                if (startSeconds === -1) {
+                  worldRunner.setSeconds(maxSeconds - 1);
+                } else {
+                  worldRunner.setSeconds(startSeconds);
+                }
+              }}
+            >
+              Next Mode Transition
+            </button>
           </div>
         )}
         {mode === "edit" && (

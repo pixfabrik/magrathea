@@ -167,6 +167,19 @@ export default class Scheduler {
   }
 
   // ----------
+  getNextModeTransitionSeconds(nowSeconds: number) {
+    for (const modePlan of this.modePlans) {
+      if (modePlan.endSeconds !== undefined) {
+        if (modePlan.endSeconds > nowSeconds) {
+          return modePlan.endSeconds;
+        }
+      }
+    }
+
+    return -1;
+  }
+
+  // ----------
   getEvents(nowSeconds: number): ScheduleEvent[] {
     const scheduleEventsFromArgs = this.eventArgsArray.map((eventArgs) => {
       const eventInfo = this.world.data.events.find(
