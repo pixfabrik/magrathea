@@ -94,7 +94,8 @@ export default class World {
     let startPaletteInfo: PaletteInfo | null = null;
     let endPaletteInfo: PaletteInfo | null = null;
 
-    const modeInfo = this.scheduler.getCurrentModeInfo(nowSeconds);
+    const currentModeInfos = this.scheduler.getCurrentModeInfos(nowSeconds);
+    const modeInfo = currentModeInfos.startModeInfo; // TODO: transition
     if (modeInfo) {
       status.mode = modeInfo.name;
 

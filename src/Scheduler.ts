@@ -3,7 +3,7 @@ import _ from "lodash";
 import seedrandom from "seedrandom";
 import World from "./World";
 import { maxSeconds } from "./vars";
-import { getDateString } from "./util";
+import { getDateString, lerp, mapLinear } from "./util";
 import { EventInfo, ModeInfo } from "./WorldData";
 
 export type SchedulerMakeArgs = {
@@ -18,6 +18,18 @@ export type ScheduleEvent = {
   progress: number;
 };
 
+export type ModePlan = {
+  modeId: number;
+  startSeconds: number;
+  endSeconds: number;
+};
+
+export type CurrentModeInfos = {
+  startModeInfo: ModeInfo | null;
+  endModeInfo: ModeInfo | null;
+  progress: number;
+};
+
 // ----------
 export default class Scheduler {
   world: World;
@@ -25,6 +37,7 @@ export default class Scheduler {
   modeId: number = -1;
   paletteId: number = -1;
   overlayId: number = -1;
+  modePlans: ModePlan[] = [];
 
   // ----------
   constructor(world: World) {
@@ -37,6 +50,7 @@ export default class Scheduler {
     this.paletteId = -1;
     this.overlayId = -1;
     this.eventArgsArray = [];
+    this.modePlans = [];
   }
 
   // ----------
@@ -77,6 +91,41 @@ export default class Scheduler {
 
     const random = seedrandom(getDateString());
 
+    // Modes
+    this.modePlans = [];
+
+    const modeInfos = this.world.data.modes.filter((modeInfo) => {
+      return modeInfo.modePaletteInfos.some(
+        (modePaletteInfo) => modePaletteInfo.paletteId !== -1
+      );
+    });
+
+    if (modeInfos.length) {
+      let previousModePlan: ModePlan | null = null;
+      for (let seconds = 0; seconds < maxSeconds; ) {
+        const modeInfo = modeInfos[Math.floor(random() * modeInfos.length)];
+
+        const durationSeconds = Math.round(60 * 60 * (1 + random() * 3));
+        const gapSeconds = Math.round(lerp(60 * 5, 60 * 30, random()));
+
+        const modePlan = {
+          modeId: modeInfo.id,
+          startSeconds: seconds,
+          endSeconds: Math.min(seconds + durationSeconds, maxSeconds),
+        };
+
+        if (previousModePlan && previousModePlan.modeId === modePlan.modeId) {
+          previousModePlan.endSeconds = modePlan.endSeconds;
+        } else {
+          this.modePlans.push(modePlan);
+          previousModePlan = modePlan;
+        }
+
+        seconds += durationSeconds + gapSeconds;
+      }
+    }
+
+    // Events
     this.world.data.events.forEach((eventInfo) => {
       for (let seconds = 0; seconds < maxSeconds; ) {
         const startSeconds = seconds + random() * 60 * 60;
@@ -98,6 +147,10 @@ export default class Scheduler {
     this.eventArgsArray = _.sortBy(this.eventArgsArray, (eventArgs) => {
       return eventArgs.startSeconds;
     });
+
+    // Logging
+    // console.log("modePlans", this.modePlans);
+    // console.log("eventArgsArray", this.eventArgsArray);
   }
 
   // ----------
@@ -172,7 +225,8 @@ export default class Scheduler {
   }
 
   // ----------
-  getCurrentModeInfo(nowSeconds: number): ModeInfo | null {
+  getCurrentModeInfos(nowSeconds: number) {
+    // Explicit palette?
     if (this.paletteId > 0) {
       const paletteInfo = this.world.data.paletteInfos.find(
         (palette) => palette.id === this.paletteId
@@ -180,25 +234,95 @@ export default class Scheduler {
 
       if (paletteInfo) {
         return {
-          id: 0,
-          name: "",
-          modePaletteInfos: [
-            {
-              id: 0,
-              paletteId: paletteInfo.id,
-              startSeconds: 0,
-              endSeconds: maxSeconds,
-            },
-          ],
+          startModeInfo: {
+            id: 0,
+            name: "",
+            modePaletteInfos: [
+              {
+                id: 0,
+                paletteId: paletteInfo.id,
+                startSeconds: 0,
+                endSeconds: maxSeconds,
+              },
+            ],
+          },
+          endModeInfo: null,
+          progress: 0,
         };
       }
     }
 
-    const modeInfo =
-      this.world.data.modes.find((mode) => mode.id === this.modeId) ||
-      this.world.data.modes[0] ||
-      null;
+    // Explicit mode?
+    if (this.modeId < 0) {
+      const modeInfo = this.world.data.modes.find(
+        (mode) => mode.id === this.modeId
+      );
 
-    return modeInfo;
+      if (modeInfo) {
+        return { startModeInfo: modeInfo, endModeInfo: null, progress: 0 };
+      }
+    }
+
+    // Figure out from mode plans
+    let startModePlan: ModePlan | null = null;
+    let endModePlan: ModePlan | null = null;
+    let startModeInfo: ModeInfo | null = null;
+    let endModeInfo: ModeInfo | null = null;
+
+    for (const modePlan of this.modePlans) {
+      if (nowSeconds >= modePlan.startSeconds) {
+        startModePlan = modePlan;
+
+        if (nowSeconds < modePlan.endSeconds) {
+          endModePlan = null;
+          break;
+        }
+      } else if (startModePlan) {
+        endModePlan = modePlan;
+        break;
+      } else {
+        startModePlan = modePlan;
+        break;
+      }
+    }
+
+    if (startModePlan) {
+      startModeInfo =
+        this.world.data.modes.find(
+          (modeInfo) => modeInfo.id === startModePlan!.modeId
+        ) || null;
+    }
+
+    if (endModePlan) {
+      endModeInfo =
+        this.world.data.modes.find(
+          (modeInfo) => modeInfo.id === endModePlan!.modeId
+        ) || null;
+    }
+
+    if (startModeInfo) {
+      if (endModeInfo && startModePlan && endModePlan) {
+        const progress = mapLinear(
+          nowSeconds,
+          startModePlan.endSeconds,
+          endModePlan.startSeconds,
+          0,
+          1,
+          true
+        );
+
+        return {
+          startModeInfo,
+          endModeInfo,
+          progress,
+        };
+      } else {
+        return { startModeInfo, endModeInfo, progress: 0 };
+      }
+    }
+
+    // No mode plans, just use the first mode
+    const modeInfo = this.world.data.modes[0] || null;
+    return { startModeInfo: modeInfo, endModeInfo: null, progress: 0 };
   }
 }

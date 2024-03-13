@@ -1,5 +1,9 @@
 # Magrathea Change Log
 
+8:
+
+- The scheduler now schedules out modes (when in view mode).
+
 7:
 
 - Added "Show" buttons to palettes and overlays so you can see them without having to put them in modes/events.
