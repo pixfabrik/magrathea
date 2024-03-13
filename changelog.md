@@ -4,6 +4,7 @@
 
 - The scheduler now schedules out modes (when in view mode) and transitions between them.
 - Added "Next Mode Transition" button to the view mode.
+- Color cycling is now based on real time rather than the time slider so the cycles don't go crazy when you time travel.
 
 7:
 

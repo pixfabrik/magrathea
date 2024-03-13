@@ -12,7 +12,6 @@ Requires Node. First time, do an `npm install`. After that, to run:
 
 ### Next
 
-- Be able to expand and collapse individual modes and events
 - Make sure everything with IDs points to valid objects. When something is deleted, check for things that reference it.
 
 ### Events
@@ -43,7 +42,6 @@ Requires Node. First time, do an `npm install`. After that, to run:
 - Be able to import PNG8
 - Panel for base pixels
 - Remember which panels are expanded or collapsed
-- Color cycling should be based on real time rather than the time slider (so it still cycles smoothly when fast forwarding)
 - Cycle blending
 - Optimize cycling so we only touch the pixels that need to change
 - What to do during transition if there are different cycles between palettes?
@@ -53,3 +51,4 @@ Requires Node. First time, do an `npm install`. After that, to run:
 - The AM/PM in the time controls are getting clipped by the clock icon
 - Customize ESLint so it doesn't complain about unused variables
 - Enable Typescript on server-side
+- Be able to expand and collapse individual modes and events

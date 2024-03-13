@@ -88,7 +88,7 @@ export default class World {
 
   // ----------
   frame(nowSeconds: number) {
-    const { paletteInfos } = this.data;
+    const nowRealSeconds = Date.now() / 1000;
 
     const status = {
       mode: "",
@@ -140,7 +140,7 @@ export default class World {
         let high = cycle.high;
         const cycleSize = high - low + 1;
         const cycleRate = cycle.rate / LBM_CYCLE_RATE_DIVISOR;
-        const cycleAmount = (cycleRate * nowSeconds) % cycleSize;
+        const cycleAmount = (cycleRate * nowRealSeconds) % cycleSize;
         if (cycle.reverse === 2) {
           [low, high] = [high, low];
         }
