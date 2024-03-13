@@ -97,8 +97,6 @@ export default class World {
     const currentModeInfos = this.scheduler.getCurrentModeInfos(nowSeconds);
     const modeInfo = currentModeInfos.startModeInfo; // TODO: transition
     if (modeInfo) {
-      status.mode = modeInfo.name;
-
       for (const modePaletteInfo of modeInfo.modePaletteInfos) {
         if (modePaletteInfo.paletteId === -1) {
           continue;
@@ -133,7 +131,13 @@ export default class World {
             (paletteInfo) => paletteInfo.id === endModePaletteInfo!.paletteId
           ) || null;
       }
-    } else {
+
+      if (startPaletteInfo) {
+        status.mode = modeInfo.name;
+      }
+    }
+
+    if (!startPaletteInfo) {
       startPaletteInfo = paletteInfos[0];
     }
 
