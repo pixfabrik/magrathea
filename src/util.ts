@@ -214,10 +214,12 @@ export async function importLbm(types: string[]): Promise<LbmData> {
 
   const layers: LbmLayer[] = [];
   for (const layer of data.image.frames[0]?.layers ?? []) {
-    layers.push({
-      name: layer.name,
-      pixels: layer.indexedPixels.flat(),
-    });
+    if (layer.indexedPixels) {
+      layers.push({
+        name: layer.name,
+        pixels: layer.indexedPixels.flat(),
+      });
+    }
   }
 
   if (!layers.length) {
