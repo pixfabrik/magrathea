@@ -93,6 +93,22 @@ export function getEmptyWorldData(): WorldData {
 }
 
 // ----------
+export function getWorldDataOverlayInfo(
+  worldData: WorldData,
+  overlayId: number
+): OverlayInfo | undefined {
+  return worldData.overlays.find((overlay) => overlay.id === overlayId);
+}
+
+// ----------
+export function getWorldDataPaletteInfo(
+  worldData: WorldData,
+  paletteId: number
+): PaletteInfo | undefined {
+  return worldData.paletteInfos.find((palette) => palette.id === paletteId);
+}
+
+// ----------
 export function isValidWorldData(worldData: WorldData): boolean {
   if (
     worldData.width <= 0 ||
@@ -108,6 +124,18 @@ export function isValidWorldData(worldData: WorldData): boolean {
       console.error("Invalid eventInfo:", eventInfo);
       return false;
     }
+
+    if (eventInfo.overlayId !== -1) {
+      const overlayInfo = getWorldDataOverlayInfo(
+        worldData,
+        eventInfo.overlayId
+      );
+
+      if (!overlayInfo) {
+        console.error("Invalid overlayId:", eventInfo.overlayId);
+        return false;
+      }
+    }
   }
 
   for (const modeInfo of worldData.modes) {
@@ -120,6 +148,18 @@ export function isValidWorldData(worldData: WorldData): boolean {
       if (modePaletteInfo.id <= 0) {
         console.error("Invalid modePaletteInfo:", modePaletteInfo);
         return false;
+      }
+
+      if (modePaletteInfo.paletteId !== -1) {
+        const paletteInfo = getWorldDataPaletteInfo(
+          worldData,
+          modePaletteInfo.paletteId
+        );
+
+        if (!paletteInfo) {
+          console.error("Invalid paletteId:", modePaletteInfo.paletteId);
+          return false;
+        }
       }
     }
   }

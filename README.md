@@ -12,8 +12,6 @@ Requires Node. First time, do an `npm install`. After that, to run:
 
 ### Next
 
-- Make sure everything with IDs points to valid objects. When something is deleted, check for things that reference it.
-
 ### Events
 
 - Be able to specify how frequently they appear

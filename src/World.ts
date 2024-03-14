@@ -395,8 +395,18 @@ export default class World {
   // ----------
   deleteOverlay(overlayIndex: number) {
     const { overlays } = this.data;
-    overlays.splice(overlayIndex, 1);
-    this.handleChange();
+    const overlayInfo = overlays[overlayIndex];
+    if (overlayInfo) {
+      overlays.splice(overlayIndex, 1);
+
+      for (const eventInfo of this.data.events) {
+        if (eventInfo.overlayId === overlayInfo.id) {
+          eventInfo.overlayId = -1;
+        }
+      }
+
+      this.handleChange();
+    }
   }
 
   // ----------
@@ -567,8 +577,20 @@ export default class World {
   // ----------
   deletePalette(paletteIndex: number) {
     const { paletteInfos } = this.data;
-    paletteInfos.splice(paletteIndex, 1);
-    this.handleChange();
+    const paletteInfo = paletteInfos[paletteIndex];
+    if (paletteInfo) {
+      paletteInfos.splice(paletteIndex, 1);
+
+      for (const modeInfo of this.data.modes) {
+        for (const modePaletteInfo of modeInfo.modePaletteInfos) {
+          if (modePaletteInfo.paletteId === paletteInfo.id) {
+            modePaletteInfo.paletteId = -1;
+          }
+        }
+      }
+
+      this.handleChange();
+    }
   }
 
   // ----------
