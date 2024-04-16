@@ -1,5 +1,9 @@
 # Magrathea Change Log
 
+9:
+
+- You can now edit the names of palettes, overlays, modes, and events.
+
 8:
 
 - The scheduler now schedules out modes (when in view mode) and transitions between them.

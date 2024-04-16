@@ -13,6 +13,7 @@ import { getSecondsFromTimeString, importLbm, makeTimeString } from "../util";
 import { maxSeconds } from "../vars";
 import _ from "lodash";
 import classNames from "classnames";
+import EditableText from "./EditableText";
 
 type ControlsProps = {
   worldRunner: WorldRunner;
@@ -173,7 +174,13 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                   (paletteInfo: PaletteInfo, paletteIndex: number) => {
                     return (
                       <div key={paletteInfo.id} className="resource-info">
-                        <div className="name">{paletteInfo.name}</div>
+                        <EditableText
+                          className="name"
+                          value={paletteInfo.name}
+                          onChange={(value) => {
+                            world.updatePalette(paletteIndex, { name: value });
+                          }}
+                        />
                         <div className="colors">
                           {paletteInfo.colors.map(
                             (color: number[], index: number) => {
@@ -237,7 +244,13 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                   (overlayInfo: OverlayInfo, overlayIndex: number) => {
                     return (
                       <div key={overlayInfo.id} className={`resource-info`}>
-                        <div className="name">{overlayInfo.name}</div>
+                        <EditableText
+                          className="name"
+                          value={overlayInfo.name}
+                          onChange={(value) => {
+                            world.updateOverlay(overlayIndex, { name: value });
+                          }}
+                        />
                         <button
                           onClick={() => {
                             world.scheduler.setOverlay(overlayInfo.id);
@@ -287,7 +300,13 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
                 (eventInfo: EventInfo, eventIndex: number) => {
                   return (
                     <div key={eventInfo.id} className={`resource-info`}>
-                      <div className="name">{eventInfo.name}</div>
+                      <EditableText
+                        className="name"
+                        value={eventInfo.name}
+                        onChange={(value) => {
+                          world.updateEvent(eventIndex, { name: value });
+                        }}
+                      />
                       Overlay:{" "}
                       <select
                         value={eventInfo.overlayId}
@@ -473,7 +492,13 @@ const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
               worldData.modes.map((modeInfo: ModeInfo, modeIndex: number) => {
                 return (
                   <div key={modeInfo.id} className={`resource-info`}>
-                    <div className="name">{modeInfo.name}</div>
+                    <EditableText
+                      className="name"
+                      value={modeInfo.name}
+                      onChange={(value) => {
+                        world.updateMode(modeIndex, { name: value });
+                      }}
+                    />
                     <div className="mode-palette-area">
                       {modeInfo.modePaletteInfos.map(
                         (

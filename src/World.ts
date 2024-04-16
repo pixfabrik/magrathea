@@ -10,6 +10,7 @@ import {
   isValidWorldData,
   ModeInfo,
   ModePaletteInfo,
+  OverlayInfo,
   PaletteInfo,
   PaletteInfoV1,
   WorldData,
@@ -407,6 +408,15 @@ export default class World {
 
       this.handleChange();
     }
+  }
+
+  // ----------
+  updateOverlay(overlayIndex: number, newInfo: Partial<OverlayInfo>) {
+    const { overlays } = this.data;
+    const overlayInfo = overlays[overlayIndex];
+    Object.assign(overlayInfo, newInfo);
+
+    this.handleChange();
   }
 
   // ----------
