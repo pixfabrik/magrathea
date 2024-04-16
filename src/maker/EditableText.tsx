@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import "./EditableText.less";
 import classNames from "classnames";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 type EditableTextProps = {
   className: string;
@@ -15,12 +15,16 @@ const EditableText: React.FC<EditableTextProps> = ({
   value,
   onChange,
 }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [text, setText] = useState(value);
+  const [text, setText] = useState("");
 
   useEffect(() => {
-    setText(value);
-  }, [value]);
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
 
   return (
     <div className={classNames("EditableText", className)}>
@@ -28,22 +32,31 @@ const EditableText: React.FC<EditableTextProps> = ({
         <div
           onClick={() => {
             setIsEditing(true);
+            setText(value);
           }}
         >
-          {text}
+          {value}
         </div>
       )}
       {isEditing && (
         <input
           type="text"
           value={text}
+          ref={inputRef}
           onChange={(e) => {
             setText(e.target.value);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              setIsEditing(false);
+              onChange(text);
+            } else if (e.key === "Escape") {
+              setIsEditing(false);
+            }
           }}
           onBlur={() => {
             setIsEditing(false);
             onChange(text);
-            setText(value);
           }}
         />
       )}
