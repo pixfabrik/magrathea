@@ -39,7 +39,6 @@ Requires Node. First time, do an `npm install`. After that, to run:
 - Be able to import GIF
 - Be able to import PNG8
 - Panel for base pixels
-- Remember which panels are expanded or collapsed
 - Cycle blending
 - Optimize cycling so we only touch the pixels that need to change
 - What to do during transition if there are different cycles between palettes?

@@ -14,6 +14,7 @@ import { maxSeconds } from "../vars";
 import _ from "lodash";
 import classNames from "classnames";
 import EditableText from "./EditableText";
+import { useStorageState } from "../storage";
 
 type ControlsProps = {
   worldRunner: WorldRunner;
@@ -21,10 +22,22 @@ type ControlsProps = {
 
 const Controls: React.FC<ControlsProps> = ({ worldRunner }) => {
   const [changeCount, setChangeCount] = useState<number>(0);
-  const [paletteAreaOpen, setPaletteAreaOpen] = useState<boolean>(false);
-  const [overlayAreaOpen, setOverlayAreaOpen] = useState<boolean>(false);
-  const [eventAreaOpen, setEventAreaOpen] = useState<boolean>(false);
-  const [modeAreaOpen, setModeAreaOpen] = useState<boolean>(false);
+  const [paletteAreaOpen, setPaletteAreaOpen] = useStorageState<boolean>(
+    "paletteAreaOpen",
+    false
+  );
+  const [overlayAreaOpen, setOverlayAreaOpen] = useStorageState<boolean>(
+    "overlayAreaOpen",
+    false
+  );
+  const [eventAreaOpen, setEventAreaOpen] = useStorageState<boolean>(
+    "eventAreaOpen",
+    false
+  );
+  const [modeAreaOpen, setModeAreaOpen] = useStorageState<boolean>(
+    "modeAreaOpen",
+    false
+  );
   const [mode, setMode] = useState<"view" | "edit">("edit");
   const seconds = worldRunner.getSeconds();
   const world = worldRunner.world;

@@ -1,5 +1,9 @@
 # Magrathea Change Log
 
+10:
+
+- It now remembers which panels are expanded or collapsed.
+
 9:
 
 - You can now edit the names of palettes, overlays, modes, and events.

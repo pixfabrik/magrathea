@@ -1,4 +1,5 @@
 import { LbmData } from "./types";
+import React, { useEffect, useState } from "react";
 
 const mainImageStorageKey = "mainImage";
 
@@ -16,4 +17,24 @@ export function loadImage(): Promise<LbmData> {
 // ----------
 export function saveImage(data: LbmData) {
   localStorage.setItem(mainImageStorageKey, JSON.stringify(data));
+}
+
+// ----------
+export function useStorageState<T>(
+  key: string,
+  defaultValue: T
+): [T, React.Dispatch<React.SetStateAction<T>>] {
+  const [state, setState] = useState<T>(() => {
+    const value = localStorage.getItem(key);
+    if (value) {
+      return JSON.parse(value);
+    }
+    return defaultValue;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(key, JSON.stringify(state));
+  }, [key, state]);
+
+  return [state, setState];
 }
