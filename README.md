@@ -12,6 +12,8 @@ Requires Node. First time, do an `npm install`. After that, to run:
 
 ### Next
 
+- Viewer
+
 ### Events
 
 - Be able to specify how frequently they appear
@@ -31,7 +33,10 @@ Requires Node. First time, do an `npm install`. After that, to run:
 - UI to show current time
 - Crop vs. letterbox feature
 - Be able to pan when cropped
-- Instead of view/edit controls in editor, have it link to the viewer (and provide a link back)
+- UI for zooming
+- Auto-pan feature?
+- Have it fill out the page (no title, no margin)
+- Instead of view/edit controls in editor, have it link to the viewer (and provide a link back)?
 - Optional status bar?
 
 ### Backlog
