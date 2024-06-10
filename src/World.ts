@@ -56,28 +56,38 @@ export default class World {
   onChange: (() => void) | null = null;
 
   // ----------
-  constructor() {
+  constructor(sceneUrl: string | null = null) {
     window.addEventListener("resize", this.handleResize);
 
-    const storage = localStorage.getItem(worldStorageKey);
-    if (storage) {
-      try {
-        const parsedStorage = JSON.parse(storage);
-        if (typeof parsedStorage === "object") {
-          // console.log("storage", typeof parsedStorage, parsedStorage);
-          let parsedData, version;
-          if (parsedStorage.format) {
-            parsedData = parsedStorage.data;
-            version = parsedStorage.format.version;
-          } else {
-            parsedData = parsedStorage;
-            version = 0;
-          }
-
+    if (sceneUrl) {
+      fetch(sceneUrl)
+        .then((response) => response.json())
+        .then((parsedStorage) => {
+          const parsedData = parsedStorage.data;
+          const version = parsedStorage.format.version;
           this.ingestData(parsedData, version);
+        });
+    } else {
+      const storage = localStorage.getItem(worldStorageKey);
+      if (storage) {
+        try {
+          const parsedStorage = JSON.parse(storage);
+          if (typeof parsedStorage === "object") {
+            // console.log("storage", typeof parsedStorage, parsedStorage);
+            let parsedData, version;
+            if (parsedStorage.format) {
+              parsedData = parsedStorage.data;
+              version = parsedStorage.format.version;
+            } else {
+              parsedData = parsedStorage;
+              version = 0;
+            }
+
+            this.ingestData(parsedData, version);
+          }
+        } catch (err) {
+          console.error("Error parsing world data:", err);
         }
-      } catch (err) {
-        console.error("Error parsing world data:", err);
       }
     }
   }

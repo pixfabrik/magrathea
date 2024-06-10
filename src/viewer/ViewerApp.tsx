@@ -3,7 +3,14 @@ import "./ViewerApp.less";
 import { useEffect, useRef, useState } from "react";
 import WorldRunner from "../WorldRunner";
 
-const worldRunner = new WorldRunner();
+const params = new URLSearchParams(window.location.search);
+const scene = params.get("scene");
+let sceneUrl = "";
+if (scene) {
+  sceneUrl = `scenes/${scene}.json`;
+}
+
+const worldRunner = new WorldRunner(sceneUrl);
 
 function ViewerApp() {
   const [changeCount, setChangeCount] = useState<number>(0);

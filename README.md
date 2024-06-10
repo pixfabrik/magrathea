@@ -54,3 +54,9 @@ Requires Node. First time, do an `npm install`. After that, to run:
 - Customize ESLint so it doesn't complain about unused variables
 - Enable Typescript on server-side
 - Be able to expand and collapse individual modes and events
+
+## LICENSE
+
+The code in this project is open-source (license TBD) but all artwork is copyright their respective creators.
+
+Chine scene copyright Jon Davies.

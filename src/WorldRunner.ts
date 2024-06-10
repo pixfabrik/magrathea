@@ -10,8 +10,8 @@ export default class WorldRunner {
   onStatusChange: (() => void) | null = null;
 
   // ----------
-  constructor() {
-    this.world = new World();
+  constructor(sceneUrl: string | null = null) {
+    this.world = new World(sceneUrl);
 
     const now = new Date();
     this.midnightSeconds =
