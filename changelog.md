@@ -3,6 +3,8 @@
 11:
 
 - The viewer now fills the window with the content and slowly pans across it.
+- Now if you tap on the viewer, UI comes up. It shows the name of the piece and a settings button.
+- The settings button opens up a settings panel with just one option for now: being able to letterbox the content rather than filling the window with it.
 
 10:
 

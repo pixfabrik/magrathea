@@ -2,6 +2,8 @@
 import "./ViewerApp.less";
 import { useEffect, useRef, useState } from "react";
 import WorldRunner from "../WorldRunner";
+import ViewerUi from "./ViewerUi";
+import ViewerSettings from "./ViewerSettings";
 
 const params = new URLSearchParams(window.location.search);
 const scene = params.get("scene");
@@ -15,6 +17,8 @@ worldRunner.world.setViewMode("pan");
 
 function ViewerApp() {
   const [changeCount, setChangeCount] = useState<number>(0);
+  const [showUi, setShowUi] = useState<boolean>(false);
+  const [showSettings, setShowSettings] = useState<boolean>(false);
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -35,15 +39,30 @@ function ViewerApp() {
 
   return (
     <div className="ViewerApp">
-      {/* <div className="top-nav">
-        Living Worlds Viewer
-        {worldRunner.world.data.name ? " - " + worldRunner.world.data.name : ""}
-      </div> */}
-      <div className="main-area">
-        <div className="canvas-area">
-          <canvas ref={canvasRef} />
-        </div>
+      <div
+        className="canvas-area"
+        onClick={() => {
+          setShowUi(!showUi);
+        }}
+      >
+        <canvas ref={canvasRef} />
       </div>
+      {showUi && (
+        <ViewerUi
+          name={worldRunner.world.data.name}
+          onSettingsClick={() => {
+            setShowSettings(true);
+          }}
+        />
+      )}
+      {showSettings && (
+        <ViewerSettings
+          world={worldRunner.world}
+          onClose={() => {
+            setShowSettings(false);
+          }}
+        />
+      )}
     </div>
   );
 }

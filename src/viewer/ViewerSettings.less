@@ -1,0 +1,46 @@
+.ViewerSettings {
+  display: flex;
+  position: absolute;
+  flex-direction: column;
+  gap: 20px;
+  background: #444;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 200;
+  font-size: 15px;
+  color: #fff;
+
+  .title {
+    text-align: center;
+    font-size: 30px;
+    margin: 20px;
+    color: #fff;
+  }
+
+  .controls {
+    padding: 20px;
+  }
+
+  .button {
+    font-size: 20px;
+    color: #fff;
+    background: #888;
+    border-radius: 10px;
+    padding: 10px;
+    pointer-events: initial;
+    cursor: pointer;
+  }
+
+  .spacer {
+    flex-grow: 1;
+  }
+
+  .close-button {
+    margin: 40px;
+    width: 150px;
+    align-self: center;
+    text-align: center;
+  }
+}

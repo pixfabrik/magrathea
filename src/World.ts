@@ -940,6 +940,7 @@ export default class World {
         canvas.classList.add("pan-mode");
       } else {
         canvas.classList.remove("pan-mode");
+        canvas.style.transform = "";
       }
     }
   }
