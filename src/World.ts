@@ -51,6 +51,7 @@ export default class World {
   modePaletteStatuses: ModePaletteStatus[][] = [];
   isBad: boolean = false;
   firstDraw: boolean = true;
+  viewMode = "letterbox";
 
   scheduler = new Scheduler(this);
   onChange: (() => void) | null = null;
@@ -106,6 +107,35 @@ export default class World {
       palette: "",
     };
 
+    // Pan scene
+    if (this.viewMode === "pan" && this.ctx) {
+      const now = Date.now();
+      let panFactor = (now * 0.0000001) % 2;
+      if (panFactor > 1) {
+        panFactor = 2 - panFactor;
+      }
+
+      const canvas = this.ctx.canvas;
+      const container = canvas.parentElement;
+      if (container) {
+        const diffX = canvas.clientWidth - container.clientWidth;
+        const diffY = canvas.clientHeight - container.clientHeight;
+        let panX = 0;
+        let panY = 0;
+
+        if (diffX > 0) {
+          panX = Math.round(lerp(-diffX / 2, diffX / 2, panFactor));
+        }
+
+        if (diffY > 0) {
+          panY = Math.round(lerp(-diffY / 2, diffY / 2, panFactor));
+        }
+
+        canvas.style.transform = `translate(${panX}px, ${panY}px)`;
+      }
+    }
+
+    // Animate scene
     const currentModeInfos = this.scheduler.getCurrentModeInfos(nowSeconds);
 
     let startModePalette: ModePalette | null = null;
@@ -325,6 +355,7 @@ export default class World {
   setCanvas(canvas: HTMLCanvasElement) {
     this.ctx = canvas.getContext("2d")!;
     this.updateForImage();
+    this.updateForViewMode();
   }
 
   // ----------
@@ -893,5 +924,23 @@ export default class World {
     this.updateForImage();
 
     // console.log(this.paletteInfos);
+  }
+
+  // ----------
+  setViewMode(viewMode: string) {
+    this.viewMode = viewMode;
+    this.updateForViewMode();
+  }
+
+  // ----------
+  updateForViewMode() {
+    if (this.ctx) {
+      const canvas = this.ctx.canvas;
+      if (this.viewMode === "pan") {
+        canvas.classList.add("pan-mode");
+      } else {
+        canvas.classList.remove("pan-mode");
+      }
+    }
   }
 }

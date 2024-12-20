@@ -1,5 +1,9 @@
 # Magrathea Change Log
 
+11:
+
+- The viewer now fills the window with the content and slowly pans across it.
+
 10:
 
 - It now remembers which panels are expanded or collapsed.

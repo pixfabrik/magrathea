@@ -6,7 +6,7 @@
   height: 100vh;
   overflow: hidden;
   flex-direction: column;
-  background: @background-color;
+  background: #000;
   color: @text-color;
   font-family: "Helvetica Neue", sans-serif;
 
@@ -31,14 +31,25 @@
     flex-grow: 1;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
 
     canvas {
-      width: 95%;
+      width: 100%;
       image-rendering: pixelated;
 
       &.height-bound {
         width: auto;
-        height: 95%;
+        height: 100%;
+      }
+
+      &.pan-mode {
+        width: auto;
+        height: 100%;
+
+        &.height-bound {
+          width: 100%;
+          height: auto;
+        }
       }
     }
   }

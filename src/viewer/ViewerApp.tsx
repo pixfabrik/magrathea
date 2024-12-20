@@ -11,6 +11,7 @@ if (scene) {
 }
 
 const worldRunner = new WorldRunner(sceneUrl);
+worldRunner.world.setViewMode("pan");
 
 function ViewerApp() {
   const [changeCount, setChangeCount] = useState<number>(0);
@@ -34,10 +35,10 @@ function ViewerApp() {
 
   return (
     <div className="ViewerApp">
-      <div className="top-nav">
+      {/* <div className="top-nav">
         Living Worlds Viewer
         {worldRunner.world.data.name ? " - " + worldRunner.world.data.name : ""}
-      </div>
+      </div> */}
       <div className="main-area">
         <div className="canvas-area">
           <canvas ref={canvasRef} />
