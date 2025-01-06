@@ -1,5 +1,10 @@
 # Magrathea Change Log
 
+12:
+
+- The viewer UI now appears at beginning and then fades away.
+- In general, the UI fades away instead of just popping off.
+
 11:
 
 - The viewer now fills the window with the content and slowly pans across it.
